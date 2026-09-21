@@ -523,6 +523,36 @@ def save_storage_year():
     return jsonify({'success': True, 'year': year})
 
 
+@bp.route('/api/storage/base_dir', methods=['GET'])
+def get_storage_base_dir():
+    """读取自定义存储位置（storage.base_dir，空 = 默认「exe 旁/文章」）"""
+    from werss.config import cfg
+    return jsonify({'success': True, 'base_dir': cfg.get('storage.base_dir', '') or ''})
+
+
+@bp.route('/api/storage/base_dir', methods=['POST'])
+def save_storage_base_dir():
+    """保存自定义存储位置。传入的路径留空则回到默认；目录不存在会自动创建。"""
+    from werss.config import cfg
+    from crawler import get_article_base
+    data = request.get_json() or {}
+    custom = str(data.get('base_dir', '')).strip()
+    if custom:
+        if not os.path.isabs(custom):
+            return jsonify({'success': False, 'error': '请填写完整路径（如 D:\\文章库）'}), 400
+        try:
+            test_root = os.path.abspath(os.path.join(custom, '文章'))
+            os.makedirs(test_root, exist_ok=True)
+            if not os.path.isdir(test_root):
+                raise OSError('目录无法创建')
+        except Exception as e:
+            return jsonify({'success': False, 'error': f'路径不可用: {e}'}), 400
+    cfg.set('storage.base_dir', custom)
+    cfg.save()
+    return jsonify({'success': True, 'base_dir': custom,
+                    'article_base': get_article_base()})
+
+
 # ==================== 在线更新 API ====================
 
 # Gitee 在线更新源（只读检查：只提示新版本并给出下载地址，不执行任何拉取/覆盖）

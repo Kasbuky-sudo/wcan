@@ -17,18 +17,27 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def get_article_base(include_year: bool = False):
-    """文章存储根目录 = 项目根目录下的「文章」。
+    """文章存储根目录。
 
+    优先级：config.yaml 的 storage.base_dir > 默认（user_dir 下的「文章」）。
     默认值同时适用于容器与 Windows 本地运行：容器里项目根就是 /app，
     解析结果与原先硬编码的 /app/文章 完全一致。
     include_year=True 时再拼上 config.yaml 里的 storage_year 子目录。
     """
     try:
-        from paths import user_dir
-        _root = user_dir()
+        from werss.config import cfg
+        custom = (cfg.get('storage.base_dir', '') or '').strip()
     except Exception:
-        _root = os.path.dirname(os.path.abspath(__file__))
-    base = os.path.abspath(os.path.join(_root, '文章'))
+        custom = ''
+    if custom:
+        base = os.path.abspath(os.path.join(str(custom), '文章'))
+    else:
+        try:
+            from paths import user_dir
+            _root = user_dir()
+        except Exception:
+            _root = os.path.dirname(os.path.abspath(__file__))
+        base = os.path.abspath(os.path.join(_root, '文章'))
     if include_year:
         try:
             from werss.config import cfg

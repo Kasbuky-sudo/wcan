@@ -1,63 +1,37 @@
+admin_password: ${WCAN_ADMIN_PWD:-}
 app_name: 编舟文心
-version: "6.0.0"
-
+count: 10
+db: sqlite:///data/articles.db
+interval: 10
+max_page: 5
+notice:
+  email:
+    smtp_from: ''
+    smtp_host: ''
+    smtp_password: ${SMTP_PASSWORD:-}
+    smtp_port: 465
+    smtp_security: ssl
+    smtp_to: ''
+    smtp_user: ''
+  webhook: ''
+  wechat: ''
+rss:
+  add_cover: false
+  base_url: ''
+  full_context: false
+  local: true
+  page_size: 30
+secret: ${WCAN_SECRET:-}
 server:
+  auth_web: false
+  enable_job: true
   name: 编舟文心
   web_name: 网编部二级网站管理工具
-  enable_job: true
-  auth_web: false
-
-db: "sqlite:///data/articles.db"
-
-# 会话与加密密钥。WebDAV / 邮箱密码的加密密钥由它派生（app/core.py），
-# 一旦设定后不要再改，否则已保存的密码将无法解密。
-# 公网部署务必设置：docker compose 会从同目录 .env 注入 WCAN_SECRET
-secret: "${WCAN_SECRET:-}"
-
-# 管理员密码（用于清空历史记录、检查更新、重启等敏感操作）
-# 优先读环境变量 WCAN_ADMIN_PWD（见 .env.example），此处留空即可
-admin_password: "${WCAN_ADMIN_PWD:-}"
-
-user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-
-interval: 10
-
-# 定时批量同步间隔（分钟），与 interval 区分
+storage:
+  base_dir: ''
+storage_year: ''
 sync_interval: 10
-
-max_page: 5
-
-count: 10
-
 token_expire_minutes: 4320
-
-notice:
-  webhook: ""
-  wechat: ""
-  email:
-    smtp_host: ""
-    smtp_port: 465
-    smtp_security: "ssl"
-    smtp_user: ""
-    smtp_password: "${SMTP_PASSWORD:-}"
-    smtp_from: ""
-    smtp_to: ""
-
-rss:
-  base_url: ""
-  local: true
-  full_context: false
-  add_cover: false
-  page_size: 30
-
-# 过期提醒阈值（小时），在授权到期前多久开始提醒
 token_reminder_hours: 12
-
-# 存储年份子目录，留空则不区分年份直接按日期存储
-storage_year: ""
-
-# 离线更新目录，存放 编舟文心_v版本号_update 格式的更新包
-# update_dir: "./update"
-
-# 一言文件路径，映射外部文件时设为容器内挂载路径，如 /app/data/yiyan.html
-# yiyan_path: "/app/data/yiyan.html"
+user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+version: 6.0.2
