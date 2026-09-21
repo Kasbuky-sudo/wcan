@@ -21,7 +21,8 @@ $body = @{
     prerelease       = $false
 } | ConvertTo-Json
 try {
-    $r = Invoke-RestMethod -Method Post -Uri "$Api/releases" -Headers $H -Body $body -ContentType 'application/json'
+    # 必须显式用 UTF-8 字节发，否则 PS 5.1 会按 ANSI 编码，中文全变成 ????
+    $r = Invoke-RestMethod -Method Post -Uri "$Api/releases" -Headers $H -Body ([Text.Encoding]::UTF8.GetBytes($body)) -ContentType 'application/json; charset=utf-8'
     Write-Host "  Release 已创建: $($r.tag_name)"
 } catch {
     # 已存在同名 Release 则复用
@@ -35,7 +36,8 @@ $releaseId = $r.id
 function Send-Attachment {
     param([string]$Path, [string]$ContentType)
     $file = Resolve-Path $Path
-    $uploadUri = "$Api/releases/$releaseId/attach_files?token=$Token"
+    # 附件接口只认 Authorization 头；用 ?token= 传凭据会回 40001 登录失效
+    $uploadUri = "$Api/releases/$releaseId/attach_files"
     $boundary = [Guid]::NewGuid().ToString()
     $fileName = [IO.Path]::GetFileName($file)
     $bytes = [IO.File]::ReadAllBytes($file)
@@ -50,7 +52,7 @@ function Send-Attachment {
     [Array]::Copy($headerBytes,0,$full,0,$headerBytes.Length)
     [Array]::Copy($bytes,0,$full,$headerBytes.Length,$bytes.Length)
     [Array]::Copy($tailBytes,0,$full,$headerBytes.Length+$bytes.Length,$tailBytes.Length)
-    $resp = Invoke-WebRequest -Method Post -Uri $uploadUri -ContentType "multipart/form-data; boundary=$boundary" -Body $full -UseBasicParsing
+    $resp = Invoke-WebRequest -Method Post -Uri $uploadUri -Headers $H -ContentType "multipart/form-data; boundary=$boundary" -Body $full -UseBasicParsing
     if ($resp.StatusCode -in 200,201) {
         Write-Host "  附件已上传: $fileName"
     } else {
