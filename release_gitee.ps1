@@ -12,11 +12,13 @@ $H = @{}; $H['Authorization'] = "Bearer $Token"   # requests 风格; gitee 亦�
 
 # 1) 创建 Release（不带附件）
 $tag = "v$Version"
+$sha = (git rev-parse HEAD).Trim()   # Gitee 建 Release 必须要 target_commitish
 $body = @{
-    tag_name    = $tag
-    name        = "编舟文心 v$Version"
-    body        = "更新内容见仓库 templates/changelog.html 或应用内「更新日志」。"
-    prerelease  = $false
+    tag_name         = $tag
+    name             = "编舟文心 v$Version"
+    body             = "更新内容见仓库 templates/changelog.html 或应用内「更新日志」。"
+    target_commitish = $sha
+    prerelease       = $false
 } | ConvertTo-Json
 try {
     $r = Invoke-RestMethod -Method Post -Uri "$Api/releases" -Headers $H -Body $body -ContentType 'application/json'
@@ -29,28 +31,34 @@ try {
 }
 $releaseId = $r.id
 
-# 2) 上传 zip 附件
-$zipFile = Resolve-Path $ZipPath
-$uploadUri = "$Api/releases/$releaseId/attach_files?token=$Token"
-$boundary = [Guid]::NewGuid().ToString()
-$fileName = [IO.Path]::GetFileName($zipFile)
-$bytes = [IO.File]::ReadAllBytes($zipFile)
-$lf = "`r`n"
-$bodyParts = New-Object System.Text.StringBuilder
-[void]$bodyParts.Append("--$boundary$lf")
-[void]$bodyParts.Append("Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"$lf")
-[void]$bodyParts.Append("Content-Type: application/zip$lf$lf")
-$headerBytes = [Text.Encoding]::UTF8.GetBytes($bodyParts.ToString())
-$tailBytes = [Text.Encoding]::UTF8.GetBytes("$lf--$boundary--$lf")
-$full = New-Object byte[] ($headerBytes.Length + $bytes.Length + $tailBytes.Length)
-[Array]::Copy($headerBytes,0,$full,0,$headerBytes.Length)
-[Array]::Copy($bytes,0,$full,$headerBytes.Length,$bytes.Length)
-[Array]::Copy($tailBytes,0,$full,$headerBytes.Length+$bytes.Length,$tailBytes.Length)
-$resp = Invoke-WebRequest -Method Post -Uri $uploadUri -ContentType "multipart/form-data; boundary=$boundary" -Body $full -UseBasicParsing
-if ($resp.StatusCode -in 200,201) {
-    Write-Host "  附件已上传: $fileName"
-} else {
-    Write-Host "  附件上传失败: $($resp.StatusCode)"
-    exit 1
+# 2) 上传附件：zip 给用户下载，version.json 给应用内「检查更新」读版本号（缺了它在线更新会静默失效）
+function Send-Attachment {
+    param([string]$Path, [string]$ContentType)
+    $file = Resolve-Path $Path
+    $uploadUri = "$Api/releases/$releaseId/attach_files?token=$Token"
+    $boundary = [Guid]::NewGuid().ToString()
+    $fileName = [IO.Path]::GetFileName($file)
+    $bytes = [IO.File]::ReadAllBytes($file)
+    $lf = "`r`n"
+    $bodyParts = New-Object System.Text.StringBuilder
+    [void]$bodyParts.Append("--$boundary$lf")
+    [void]$bodyParts.Append("Content-Disposition: form-data; name=`"file`"; filename=`"$fileName`"$lf")
+    [void]$bodyParts.Append("Content-Type: $ContentType$lf$lf")
+    $headerBytes = [Text.Encoding]::UTF8.GetBytes($bodyParts.ToString())
+    $tailBytes = [Text.Encoding]::UTF8.GetBytes("$lf--$boundary--$lf")
+    $full = New-Object byte[] ($headerBytes.Length + $bytes.Length + $tailBytes.Length)
+    [Array]::Copy($headerBytes,0,$full,0,$headerBytes.Length)
+    [Array]::Copy($bytes,0,$full,$headerBytes.Length,$bytes.Length)
+    [Array]::Copy($tailBytes,0,$full,$headerBytes.Length+$bytes.Length,$tailBytes.Length)
+    $resp = Invoke-WebRequest -Method Post -Uri $uploadUri -ContentType "multipart/form-data; boundary=$boundary" -Body $full -UseBasicParsing
+    if ($resp.StatusCode -in 200,201) {
+        Write-Host "  附件已上传: $fileName"
+    } else {
+        Write-Host "  附件上传失败: $fileName ($($resp.StatusCode))"
+        exit 1
+    }
 }
+
+Send-Attachment -Path $ZipPath -ContentType 'application/zip'
+Send-Attachment -Path (Join-Path $PSScriptRoot 'version.json') -ContentType 'application/json'
 exit 0
