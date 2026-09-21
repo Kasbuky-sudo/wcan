@@ -782,6 +782,11 @@ def static_files(filename):
     parts = filename.replace('\\', '/').split('/')
     if any(p in sensitive_dirs for p in parts):
         return jsonify({'error': 'Forbidden'}), 403
+    # 运行时生成的文件（如微信扫码二维码 wx_qrcode.png）落在可写目录的 static/ 下，
+    # 优先于打包资源提供：冻结成 exe 后二者不在同一个目录
+    runtime_path = os.path.join(user_dir(), filename)
+    if os.path.isfile(runtime_path):
+        return send_from_directory(os.path.dirname(runtime_path), os.path.basename(runtime_path))
     return send_from_directory(bundle_dir(), filename)
 
 def is_lunar_red_date():

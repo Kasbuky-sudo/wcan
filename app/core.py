@@ -4,9 +4,10 @@
 """
 import os
 import sys
+import shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from paths import bundle_dir, user_dir
+from paths import bundle_dir, user_dir, is_frozen
 
 from flask import Flask, request, jsonify
 import json
@@ -33,7 +34,27 @@ __version__ = "6.0.0"
 DATA_DIR = user_dir()
 # 只读程序资源目录：冻结成 exe 后指向解包目录（sys._MEIPASS）
 _TEMPLATES_DIR = os.path.join(bundle_dir(), 'templates')
-_STATIC_DIR = os.path.join(bundle_dir(), 'static')
+_BUNDLE_STATIC_DIR = os.path.join(bundle_dir(), 'static')
+
+# 静态资源目录：运行时文件（如微信扫码二维码 wx_qrcode.png）会写入
+# user_dir()/static，而打包资源在 bundle 的 static 里。冻结后二者不在同一目录，
+# Flask 的 static_folder 只认一个 → 首次启动把打包资源镜像到 user_dir 旁，
+# 之后统一从 user_dir/static 提供（运行时文件与资源文件两全）。
+_STATIC_DIR = _BUNDLE_STATIC_DIR
+if is_frozen() and os.path.isdir(_BUNDLE_STATIC_DIR):
+    _runtime_static = os.path.join(DATA_DIR, 'static')
+    try:
+        for _root, _dirs, _files in os.walk(_BUNDLE_STATIC_DIR):
+            _rel = os.path.relpath(_root, _BUNDLE_STATIC_DIR)
+            _dst_root = os.path.normpath(os.path.join(_runtime_static, _rel))
+            os.makedirs(_dst_root, exist_ok=True)
+            for _f in _files:
+                _dst = os.path.join(_dst_root, _f)
+                if not os.path.exists(_dst):
+                    shutil.copy2(os.path.join(_root, _f), _dst)
+        _STATIC_DIR = _runtime_static
+    except Exception as _e:
+        print(f"[Static] 镜像打包资源失败（非致命，回退到只读目录）: {_e}")
 
 # ====================== Flask 应用实例 ======================
 app = Flask(__name__, template_folder=_TEMPLATES_DIR, static_folder=_STATIC_DIR)
