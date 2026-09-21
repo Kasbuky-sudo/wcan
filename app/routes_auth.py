@@ -71,7 +71,8 @@ def auth_logout():
 def get_auth_qrcode():
     try:
         from werss.driver.wx_api import WeChat_api
-        result = WeChat_api.get_qr_code()
+        # 用户每点一次按钮都强制拿一张新二维码，不复用磁盘上残留的旧图
+        result = WeChat_api.get_qr_code(force=True)
         if result and os.path.exists(WeChat_api.qr_code_path):
             code_url = f"/static/wx_qrcode.png?t={int(time.time())}"
             return jsonify({

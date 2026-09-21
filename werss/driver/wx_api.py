@@ -31,6 +31,7 @@ class WeChatAPI:
         self.qr_code_path = os.path.abspath("static/wx_qrcode.png")
         self.lock_file_path = "data/lock.lock"
         self._lock = Lock()
+        self._login_check_uuid: Optional[str] = None
         self.login_callback: Optional[Callable] = None
         self.notice_callback = None
         os.makedirs(os.path.dirname(self.qr_code_path), exist_ok=True)
@@ -45,8 +46,11 @@ class WeChatAPI:
             'Referer': 'https://mp.weixin.qq.com/'
         })
 
-    def get_qr_code(self, callback: Optional[Callable] = None, notice: Optional[Callable] = None) -> Dict[str, Any]:
+    def get_qr_code(self, callback: Optional[Callable] = None, notice: Optional[Callable] = None, force: bool = False) -> Dict[str, Any]:
         self.__init__()
+        if force:
+            # 用户主动点“获取二维码”时，丢掉上一张旧图和旧锁，重新向微信申请一张
+            self._clear_pending_qr()
         if self.check_lock():
             print_warning("微信公众平台登录脚本正在运行，请勿重复运行")
             return {
@@ -284,7 +288,12 @@ class WeChatAPI:
             print_error(f"生成二维码图片失败: {str(e)[:100]}")
 
     def _start_login_check(self, uuid: str):
+        self._login_check_uuid = uuid
+
         def check_login():
+            # 已被更新的二维码取代：本代轮询直接退出，登录处理交给新轮询，也不动新流程的锁
+            if self._login_check_uuid != uuid:
+                return
             try:
                 status = self._check_login_status(uuid)
                 if status == 'success':
@@ -315,7 +324,8 @@ class WeChatAPI:
                 if self.notice_callback:
                     self.notice_callback('检查登录状态失败,请重试')
             finally:
-                self.release_lock()
+                if self._login_check_uuid == uuid:
+                    self.release_lock()
 
         timer = Timer(2.0, check_login)
         timer.daemon = True
@@ -540,6 +550,21 @@ class WeChatAPI:
 
     def check_lock(self, timeout: int = 300) -> bool:
         return os.path.exists(self.lock_file_path) or os.path.exists(self.qr_code_path)
+
+    def _clear_pending_qr(self):
+        """清除未使用的二维码与锁，让下次获取拿到全新的一张"""
+        # 让旧的轮询尽快退出（uuid 不一致时 _check_login_status 会因二维码文件被删而返回 exists）
+        self._login_check_uuid = None
+        try:
+            if os.path.exists(self.qr_code_path):
+                os.remove(self.qr_code_path)
+        except Exception as e:
+            print_warning(f"删除旧二维码失败: {str(e)[:80]}")
+        try:
+            if os.path.exists(self.lock_file_path):
+                os.remove(self.lock_file_path)
+        except Exception as e:
+            print_warning(f"删除旧锁文件失败: {str(e)[:80]}")
 
     def set_lock(self):
         os.makedirs(os.path.dirname(self.lock_file_path), exist_ok=True)

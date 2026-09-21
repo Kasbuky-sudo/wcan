@@ -1,6 +1,6 @@
 {
-  "version": "6.0.0",
-  "notes": "卸下 AI 与飞书，回到爬取和提取本身",
+  "version": "6.0.3",
+  "notes": "点一次获取一张新二维码，不再复用旧码；换码后旧检测自动停止；登录状态重启直接复用",
   "download_url": "https://gitee.com/AZSongguo/wcan/releases",
   "updated_at": "2026-09-21"
 }

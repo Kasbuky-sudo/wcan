@@ -34,4 +34,4 @@ sync_interval: 10
 token_expire_minutes: 4320
 token_reminder_hours: 12
 user_agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
-version: 6.0.2
+version: 6.0.3
