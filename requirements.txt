@@ -1,0 +1,15 @@
+flask>=2.0.0
+requests>=2.25.0
+beautifulsoup4>=4.9.0
+python-docx>=0.8.10
+lxml>=4.6.0
+Pillow>=8.0.0
+python-dateutil>=2.8.0
+sqlalchemy>=2.0.0
+pyyaml>=6.0
+apscheduler>=3.10.0
+passlib>=1.7.0
+bcrypt>=4.0.0
+colorama>=0.4.0
+alembic>=1.13.0
+loguru>=0.7.0

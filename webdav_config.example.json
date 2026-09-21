@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "active_id": "default",
+  "items": [
+    {
+      "id": "default",
+      "name": "默认 WebDAV",
+      "enabled": false,
+      "url": "",
+      "host": "",
+      "port": "",
+      "protocol": "https",
+      "username": "",
+      "password": "",
+      "remote_path": "/",
+      "auto_upload": false
+    }
+  ]
+}

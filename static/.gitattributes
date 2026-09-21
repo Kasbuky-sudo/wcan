@@ -1,0 +1,5 @@
+*.pug linguist-language=JavaScript
+**/*.pug linguist-vendored=false
+**/*.pug linguist-generated=false
+**/*.pug linguist-documentation=false
+**/*.pug linguist-detectable=true

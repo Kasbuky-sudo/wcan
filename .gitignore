@@ -1,0 +1,36 @@
+# ==================== 机密与本机配置 ====================
+# 含真实密钥/凭证，绝不能提交
+.env
+notify_config.json
+webdav_config.json
+
+# ==================== 运行时数据 ====================
+data/
+文章/
+update/
+logs/
+*.log
+*.db
+*.db-shm
+*.db-wal
+wx.lic
+
+# ==================== 打包产物 ====================
+dist/
+build/
+*.spec
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# ==================== 编辑器 / 系统 ====================
+.DS_Store
+.idea/
+.vscode/
+.trae/
+
+# 微信登录二维码（随时效失效，且属于个人登录态）
+static/wx_qrcode.png

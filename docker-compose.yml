@@ -1,0 +1,52 @@
+services:
+  wcan:
+    image: wcan:latest
+    container_name: wcan
+    build:
+      context: .
+      args:
+        # 镜像源加速，可替换为: docker.1ms.run / dockerpull.com / dockerhub.icu / hub.rat.dev
+        # 或用本地镜像: local/python:3.11-slim（需提前 docker pull + docker tag）
+        BASE_IMAGE: ${BASE_IMAGE:-docker.m.daocloud.io/library/python:3.11-slim}
+    ports:
+      # 云服务器部署：只绑定本机回环，由反向代理对外提供服务
+      # 务必同时在云厂商安全组 / 系统防火墙里只放行 80 和 443，不要放行 10015
+      - "127.0.0.1:10015:10015"
+      # 局域网直接访问（NAS / 本机部署）改用下面这一行：
+      # - "10015:10015"
+    volumes:
+      - ./文章:/app/文章:rw
+      - ./仿宋_GB2312.ttf:/app/仿宋_GB2312.ttf:ro
+      - ./simhei.ttf:/app/simhei.ttf:ro
+      - ./data:/app/data:rw
+      - ./config.yaml:/app/config.yaml:rw
+      # 下面两个文件必须先真实存在，否则 Docker 会把宿主机路径创建成【同名目录】导致读写失败
+      # 首次部署执行: cp -n notify_config.example.json notify_config.json
+      #               cp -n webdav_config.example.json webdav_config.json
+      - ./notify_config.json:/app/notify_config.json:rw
+      - ./webdav_config.json:/app/webdav_config.json:rw
+      - ./templates:/app/templates:rw
+      - ./static:/app/static:rw
+      - ./werss:/app/werss:rw
+      - ./jobs:/app/jobs:rw
+      - ./app:/app/app:rw
+      - ./run.py:/app/run.py:rw
+      - ./crawler.py:/app/crawler.py:rw
+      - ./entrypoint.sh:/app/entrypoint.sh:rw
+      - ./requirements.txt:/app/requirements.txt:rw
+      - ./migrations:/app/migrations:rw
+      - ./alembic.ini:/app/alembic.ini:ro
+      - ./update:/app/update:rw
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
+      # 从同目录 .env 读取（模板见 .env.example）。留空则回落到 config.yaml 里的值。
+      # 公网部署必须设置这两项，否则任何人都能用默认口令执行清空/更新/重启。
+      - WCAN_SECRET=${WCAN_SECRET:-}
+      - WCAN_ADMIN_PWD=${WCAN_ADMIN_PWD:-}
+    cap_add:
+      # 仅供容器启动时校准时钟。部分云主机不授予该 capability，
+      # 若 docker compose up 因此报错，删掉这两行即可（不影响功能）
+      - SYS_TIME
+    # user: "1000:1000"  # 注释掉用户设置，使用root权限运行
+    restart: unless-stopped

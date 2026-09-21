@@ -1,0 +1,59 @@
+[project]
+name = "wcan"
+version = "4.1.7"
+description = "编舟文心 - 微信公众号文章爬取/Word生成/知识库/AI Agent/飞书Bot"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [
+    "data",
+    "logs",
+    "__pycache__",
+    ".dbg",
+    "*.pyc",
+]
+
+[tool.ruff.lint]
+# 规则集说明：
+# E/W = pycodestyle, F = pyflakes, I = isort 兼容,
+# UP = pyupgrade, B = bugbear, SIM = simplify, C4 = comprehensions
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = [
+    "E501",   # 行长度由 black 控制，ruff 不重复检查
+    "E402",   # 模块级 import 位置（项目中有延迟导入模式）
+    "E701",   # 单行 if/else 多语句（项目风格常见）
+    "E722",   # 裸 except（项目中有大量 try/except 兜底）
+    "E741",   # 单字母变量名（l/i 等常见）
+    "B007",   # 循环变量未使用（如 _ 占位）
+    "B008",   # 函数默认值调用（Flask 装饰器风格）
+    "B904",   # raise from（项目大量直接 raise）
+    "SIM105", # contextlib.suppress 替代 try/except/pass
+    "SIM108", # 三元表达式替代 if/else（可读性优先）
+    "SIM117", # 嵌套 with 合并
+    "UP035",  # typing.Deque 等弃用类型（兼容性）
+    "UP006",  # typing.List 等弃用类型（兼容性）
+    "C408",   # dict() 调用 vs 字面量
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # __init__.py 允许未使用 import
+"jobs/*.py" = ["F401"]    # jobs 模块允许延迟导入
+"werss/driver/*.py" = ["B904"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["werss", "jobs", "app", "crawler", "ai_agent", "mcp_server", "knowledge_base", "feishu_bot"]
+combine-as-imports = true
+
+[tool.black]
+line-length = 120
+target-version = ["py311"]
+extend-exclude = "/(data|logs|\\.dbg|__pycache__)/"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["werss", "jobs", "app", "crawler", "ai_agent", "mcp_server", "knowledge_base", "feishu_bot"]
+extend_skip = ["data", "logs", ".dbg", "__pycache__"]
+combine_as_imports = true

@@ -1,0 +1,47 @@
+{
+    "_meta": {
+        "label": "English",
+        "code": "en_US"
+    },
+    "app": {
+        "title": "WCAN",
+        "version": "v{version}",
+        "welcome": "Welcome to WCAN"
+    },
+    "nav": {
+        "extract": "Extract",
+        "replace": "Replace",
+        "history": "History",
+        "rss": "RSS",
+        "settings": "Settings"
+    },
+    "status": {
+        "syncing": "Syncing",
+        "idle": "Idle",
+        "error": "Error",
+        "success": "Success",
+        "loading": "Loading...",
+        "empty": "No data"
+    },
+    "action": {
+        "crawl": "Crawl",
+        "sync": "Sync",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "refresh": "Refresh",
+        "export": "Export",
+        "upload": "Upload"
+    },
+    "msg": {
+        "save_success": "Saved successfully",
+        "save_failed": "Save failed",
+        "delete_confirm": "Confirm delete?",
+        "network_error": "Network error",
+        "permission_denied": "Permission denied",
+        "not_found": "Not found",
+        "rate_limited": "Too many requests, please retry later"
+    }
+}

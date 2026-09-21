@@ -1,0 +1,19 @@
+{
+  "webhooks": [],
+  "serverchans": [],
+  "email": {
+    "enabled": false,
+    "provider": "",
+    "smtp_host": "",
+    "smtp_port": 465,
+    "smtp_security": "ssl",
+    "smtp_user": "",
+    "smtp_password": "",
+    "smtp_from": "",
+    "smtp_to": "",
+    "max_retries": 3,
+    "retry_strategy": "exponential"
+  },
+  "last_rss_reminder": null,
+  "last_sync_time": null
+}

@@ -1,0 +1,47 @@
+{
+    "_meta": {
+        "label": "简体中文",
+        "code": "zh_CN"
+    },
+    "app": {
+        "title": "编舟文心",
+        "version": "v{version}",
+        "welcome": "欢迎使用编舟文心"
+    },
+    "nav": {
+        "extract": "提取",
+        "replace": "替换",
+        "history": "历史",
+        "rss": "RSS",
+        "settings": "设置"
+    },
+    "status": {
+        "syncing": "同步中",
+        "idle": "空闲",
+        "error": "错误",
+        "success": "成功",
+        "loading": "加载中...",
+        "empty": "暂无数据"
+    },
+    "action": {
+        "crawl": "爬取",
+        "sync": "同步",
+        "save": "保存",
+        "cancel": "取消",
+        "delete": "删除",
+        "edit": "编辑",
+        "search": "搜索",
+        "refresh": "刷新",
+        "export": "导出",
+        "upload": "上传"
+    },
+    "msg": {
+        "save_success": "保存成功",
+        "save_failed": "保存失败",
+        "delete_confirm": "确认删除？",
+        "network_error": "网络错误",
+        "permission_denied": "权限不足",
+        "not_found": "未找到",
+        "rate_limited": "请求过于频繁，请稍后重试"
+    }
+}

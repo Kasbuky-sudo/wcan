@@ -1,0 +1,1113 @@
+<style>
+.cl-ver{font-weight:700;font-size:15px;color:var(--wc-text-primary);margin-top:20px;margin-bottom:4px;}
+.cl-sub{margin-bottom:6px;color:var(--wc-text-secondary);font-style:italic;font-size:13px;}
+.cl-cat{font-weight:600;color:var(--wc-text-primary);margin-top:10px;margin-bottom:4px;font-size:13px;}
+.cl-list{margin:0;padding-left:18px;}
+.cl-list li{padding:2px 0;color:var(--wc-text-regular);font-size:13px;line-height:1.5;}
+.cl-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;margin-right:5px;vertical-align:middle;}
+.cl-new{background:rgba(7,193,96,0.15);color:#07C160;}
+.cl-fix{background:rgba(250,81,81,0.15);color:#FA5151;}
+.cl-opt{background:rgba(87,107,149,0.15);color:#576B95;}
+.cl-del{background:rgba(128,128,128,0.15);color:#888;}
+.cl-ref{background:rgba(149,117,205,0.15);color:#9575CD;}
+.cl-plan{background:rgba(250,157,59,0.15);color:#FA9D3B;}
+.cl-hr{border:none;border-top:1px dashed var(--wc-glow-border);margin:20px 0;}
+</style>
+
+<div class="cl-ver">v6.0.0 · 2026/9/21</div>
+<p class="cl-sub">卸下 AI 与飞书，回到爬取和提取本身</p>
+<div class="cl-cat">一、功能移除</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-del">删除</span>AI 助手对话与内置 AI 工具调用</li>
+<li><span class="cl-tag cl-del">删除</span>公众号生成</li>
+<li><span class="cl-tag cl-del">删除</span>知识库：Word 转知识库、知识库检索与摘要生成</li>
+<li><span class="cl-tag cl-del">删除</span>语义搜索、高级全文检索、词云可视化、自动摘要</li>
+<li><span class="cl-tag cl-del">删除</span>飞书 Bot 与飞书通知渠道</li>
+<li><span class="cl-tag cl-del">删除</span>对外 MCP 服务及相关工具调用能力</li>
+<li><span class="cl-tag cl-del">删除</span>AI 模型配置入口、对话水印，以及仅针对 AI 的海外环境限制</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>默认首页由 AI 助手改为「文章提取」</li>
+<li><span class="cl-tag cl-opt">优化</span>通知渠道收敛为 Webhook、ServerChan 与邮件三类</li>
+<li><span class="cl-tag cl-opt">优化</span>每日早报不再附带关键词与模型信息，只推当日文章清单</li>
+<li><span class="cl-tag cl-opt">优化</span>保存文章不再附带知识库导出与关键词提取，批量同步更快</li>
+<li><span class="cl-tag cl-opt">优化</span>设置页由四项入口精简为存储、通知、关于三项</li>
+<li><span class="cl-tag cl-opt">优化</span>精简九个第三方依赖，镜像体积与启动依赖同步减少</li>
+</ul>
+<div class="cl-cat">三、系统重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-ref">重构</span>移除 AI 与飞书相关的全部模块、接口、配置与界面</li>
+<li><span class="cl-tag cl-ref">重构</span>区域限制保留十个国家/地区的整站封锁，移除仅针对 AI 的软限制</li>
+<li><span class="cl-tag cl-ref">重构</span>清理无人引用的历史遗留文件</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.6 · 2026/7/6</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>Ollama 本地模型提供商支持，无需 API Key 即可使用本地部署的大模型</li>
+<li><span class="cl-tag cl-new">新增</span>飞书通知设置入口，可在界面中配置应用凭证与通知类型开关</li>
+<li><span class="cl-tag cl-new">新增</span>飞书 Bot 连接状态与管理员 Open ID 实时显示</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>微信授权 Token 启动时优先信任本地缓存，未过期则跳过远程验证，避免每次重启都需要扫码</li>
+<li><span class="cl-tag cl-opt">优化</span>移动端页面标题区改为纵向堆叠，避免按钮挤占副标题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.5 · 2026/7/6</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>关于页 AI 支持声明</li>
+<li><span class="cl-tag cl-new">新增</span>AI 身份与模型信息固定回答，展示当前模型名称与模型提供商</li>
+<li><span class="cl-tag cl-new">新增</span>飞牛 fnOS 系统识别</li>
+<li><span class="cl-tag cl-new">新增</span>ARM 平台性能识别</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>网页标题仍显示 WinUI3 预览的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>老旧四核 CPU 被误判为流畅的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>系统流畅度评估逻辑，结合 CPU 型号、架构、核心数与内存综合判断</li>
+<li><span class="cl-tag cl-opt">优化</span>开源协议弹窗布局，改为更宽松的双列卡片显示</li>
+<li><span class="cl-tag cl-opt">优化</span>ARM 设备 CPU 型号读取方式，兼容 cpuinfo、设备树与 lscpu 信息</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.4 · 2026/7/5</div>
+<p class="cl-sub">向 Anthropic 那套“看时区识语言”的小本本借了支铅笔</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>浏览器时区与首选语言辅助判断，IP 识别失灵时也能继续识别访问环境</li>
+<li><span class="cl-tag cl-new">新增</span>中国台湾地区、日本、美国、韩国、新加坡、英国、德国、法国、澳大利亚、加拿大环境的整站限制判断</li>
+<li><span class="cl-tag cl-new">新增</span>港澳环境仅限制 AI 服务，其他功能保持可用</li>
+<li><span class="cl-tag cl-new">新增</span>飞牛 fnOS 平台适配支持，拓展 NAS 场景部署能力</li>
+<li><span class="cl-tag cl-new">新增</span>fnOS FPK 安装包版本进入内部测试，NAS 也能轻松部署了</li>
+<li><span class="cl-tag cl-new">新增</span>未来更新计划弹窗，计划内容独立维护并与更新日志同款加载显示</li>
+<li><span class="cl-tag cl-new">新增</span>AI 接口服务端兜底限制，避免绕过前端按钮直接调用</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>仅靠 IP 判断时，内网穿透或代理未传递真实地址导致海外环境漏判的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>系统设置关于页的系统信息区域右侧大面积空白问题</li>
+<li><span class="cl-tag cl-opt">优化</span>地区限制策略改为 IP、时区、语言组合判断，减少单点失灵</li>
+<li><span class="cl-tag cl-opt">优化</span>为“配合” Anthropic 的“歧视化政策”，我们重写了部分逻辑并移除了 Claude 生成的代码</li>
+<li><span class="cl-tag cl-opt">优化</span>开发环境已从 Claude Code 迁移至 Codex 与 TRAE</li>
+<li><span class="cl-tag cl-opt">优化</span>系统信息卡片布局，长信息与短信息自动搭配显示</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.3 · 2026/7/4</div>
+<p class="cl-sub">完善 IP 区域拦截</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>美国、韩国、新加坡、英国、德国、法国、澳大利亚、加拿大 8 个国家/地区 IP 访问时整个应用不可用，显示对应语言法律法规提示页面</li>
+<li><span class="cl-tag cl-new">新增</span>IP 识别支持 CF-Connecting-IP、X-Real-IP、X-Forwarded-For 等多种转发头</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>中国台湾地区与日本提示页法律依据表述模糊的问题，明确为《中华人民共和国网络安全法》《生成式人工智能服务管理暂行办法》</li>
+<li><span class="cl-tag cl-fix">修复</span>主应用 core.py 仍引用旧版中国台湾地区/日本封锁页面常量导致启动报错的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>10 个国家/地区的 403 封锁页面风格</li>
+<li><span class="cl-tag cl-opt">优化</span>无法从转发头获取公网 IP 时打印诊断日志，便于排查内网穿透服务</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.2 · 2026/7/4</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>选择"30分钟"同步间隔时 parseInt 把 0.5 截断为 0，导致 APScheduler 每秒疯狂执行的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>RSS 未登录时定时任务仍疯狂执行导致 APScheduler 报"maximum running instances"的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>RSS 授权失效时疯狂往飞书推送"授权已失效"通知的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>process_all_mps 和 update_single_mp 无重入保护导致并发执行互相覆盖状态的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>手动点击"更新全部"或单篇提取时，自动中止旧任务并从头开始</li>
+<li><span class="cl-tag cl-opt">优化</span>授权失效通知添加 30 分钟节流，避免重复推送</li>
+<li><span class="cl-tag cl-opt">优化</span>定时任务启动前预检 RSS 登录状态，未登录直接跳过</li>
+<li><span class="cl-tag cl-opt">优化</span>同步间隔添加最小 1 分钟下限保护，防止 0 或负数导致调度器异常</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 设置中知识库概览、Word 转知识库、关键词索引、高级搜索、词云可视化暂时禁用，鼠标悬停提示"功能修复中"</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>AI 对话界面添加水印，显示当前使用者 IP 地址</li>
+<li><span class="cl-tag cl-new">新增</span>检测到非中国大陆 IP 访问时自动封锁 AI 对话功能，显示锁定提示</li>
+<li><span class="cl-tag cl-new">新增</span>中国台湾地区 IP 访问时整个应用不可用，显示法律法规提示页面</li>
+<li><span class="cl-tag cl-new">新增</span>日本 IP 访问时整个应用不可用，显示法律法规提示页面</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.1 · 2026/7/3</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>文章提取按钮因双重事件绑定导致点击无响应的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>公众号生成按钮同样因双重绑定导致重复触发的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>AI 对话框发送消息后气泡无样式（ai-msg-content 缺少 CSS）的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>AI 对话输入框回车键无法发送消息的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>AI 发送按钮文字更新时覆盖按钮内部图标结构的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>设置页存储管理入口调用 loadWebdavConfigs 函数名拼写错误</li>
+<li><span class="cl-tag cl-fix">修复</span>软件更新弹窗仍使用旧版 WeUI 样式的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>提取完成详细报告弹窗仍使用旧版 WeUI 样式的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>crawler.py 中 debug_log 导入路径错误导致授权调试日志丢失</li>
+<li><span class="cl-tag cl-fix">修复</span>app 包未导出 sync_status 等对象导致 process_all_mps 导入失败</li>
+<li><span class="cl-tag cl-fix">修复</span>process_all_mps 导入失败时静默返回无任何日志的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>"更新全部"按钮点击后无任何反馈的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>文章爬取新增反爬验证页面检测（环境异常、内容删除、审核中等）</li>
+<li><span class="cl-tag cl-opt">优化</span>"更新全部"后端任务全链路添加实时日志输出，Docker 日志可见</li>
+<li><span class="cl-tag cl-opt">优化</span>为文章提取相关 DOM 操作添加空值安全检查，防止元素不存在时 JS 崩溃</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 消息气泡支持代码块和行内代码的样式渲染</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v5.0.0 · 2026/7/3</div>
+<p class="cl-sub">WinUI3 风格前端全面重构</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>基于 windows-ui-fabric 的 WinUI3 风格前端</li>
+<li><span class="cl-tag cl-new">新增</span>左侧 NavBar 导航栏,支持折叠展开</li>
+<li><span class="cl-tag cl-new">新增</span>文章替换、文章提取、历史记录拆分为独立导航项</li>
+<li><span class="cl-tag cl-new">新增</span>WinUI3 风格 Toggle Switch 开关组件</li>
+<li><span class="cl-tag cl-new">新增</span>WinUI3 风格自定义下拉选择器</li>
+<li><span class="cl-tag cl-new">新增</span>页面切换动画与消息气泡动画</li>
+<li><span class="cl-tag cl-new">新增</span>资源预加载(preload),提升其他设备加载速度</li>
+<li><span class="cl-tag cl-new">新增</span>软件 Logo 与 AI 头像自定义图片</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>重建索引时原生 confirm 对话框导致网页崩溃的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>windows-ui.min.js 因缺少 navbar id 报错的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>字体文件路径 404 导致其他设备显示异常</li>
+<li><span class="cl-tag cl-fix">修复</span>下拉选项面板默认显示在页面底部的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>扫雷游戏格子缺少 CSS 导致不可见的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>清空对话后 AI 头像显示为默认地球图标的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>每日一言写死不动态加载的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>通知配置弹窗(Webhook/ServerChan/邮件)重构为 WinUI3 风格</li>
+<li><span class="cl-tag cl-opt">优化</span>联系作者区域重构为卡片式布局</li>
+<li><span class="cl-tag cl-opt">优化</span>开源协议弹窗补全全部组件网址与版权信息</li>
+<li><span class="cl-tag cl-opt">优化</span>HTML 不缓存,静态资源带版本号,避免旧版缓存</li>
+</ul>
+<div class="cl-cat">三、系统重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-ref">重构</span>移除原 WeUI 组件,全面替换为 windows-ui-fabric</li>
+<li><span class="cl-tag cl-ref">重构</span>CSS 变量体系统一为 --color-xxx,旧变量名通过别名映射兼容</li>
+<li><span class="cl-tag cl-ref">重构</span>移除页面内顶部菜单,导航统一由左侧 NavBar 管理</li>
+<li><span class="cl-tag cl-del">删除</span>移除 Debug 工具栏</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.6 · 2026/6/30</div>
+<p class="cl-sub">数据库大整修、AI 智能化与 UI 应用感改造</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>应用模块化架构，app.py 分割为 Blueprint 包</li>
+<li><span class="cl-tag cl-new">新增</span>支持"全打包发我""全部发我"等自然语言指令</li>
+<li><span class="cl-tag cl-new">新增</span>飞书 Bot 消息去重机制</li>
+<li><span class="cl-tag cl-new">新增</span>飞书 Bot 多轮对话记忆，支持"那篇""上一篇"等指代追问</li>
+<li><span class="cl-tag cl-new">新增</span>"清空对话"指令，可手动重置上下文</li>
+<li><span class="cl-tag cl-new">新增</span>飞书工具调用进度提示，不再干等</li>
+<li><span class="cl-tag cl-new">新增</span>公共 LLM Client 模块，统一三处 AI 调用</li>
+<li><span class="cl-tag cl-new">新增</span>Article 与 Feed 外键关联，支持 ORM 关系查询</li>
+<li><span class="cl-tag cl-new">新增</span>设置页采用 HOME 入口 → 二级页层级导航，更像原生应用</li>
+<li><span class="cl-tag cl-new">新增</span>更新完成后自动重启 Docker 容器，无需手动操作</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>飞书打包文章任务被重复执行多次的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>AI 工具清单分组错误导致部分工具能力缺失的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>清空历史记录功能静默失败的问题（DB.Session 为 None）</li>
+<li><span class="cl-tag cl-fix">修复</span>多个 MCP 工具引用不存在的 Feed.mp_id 字段导致报错</li>
+<li><span class="cl-tag cl-fix">修复</span>AUTOCOMMIT 与 commit/rollback 冲突导致写入可能丢失</li>
+<li><span class="cl-tag cl-fix">修复</span>文章管理三子页点击后激活态卡住不恢复的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>设置页 HOME 下方仍显示存储内容的 Bug</li>
+<li><span class="cl-tag cl-fix">修复</span>深色模式下设置页出现深色矩形遮罩的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>深色模式下部分按钮和区域灰蒙蒙看不清的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>SQLite 连接配置：WAL 模式 + busy_timeout + StaticPool</li>
+<li><span class="cl-tag cl-opt">优化</span>消除数据库重复初始化，不再泄漏连接池</li>
+<li><span class="cl-tag cl-opt">优化</span>建表前显式导入所有模型，避免 create_all 空操作</li>
+<li><span class="cl-tag cl-opt">优化</span>Article 表删除 11 个冗余单列索引，减少写入放大</li>
+<li><span class="cl-tag cl-opt">优化</span>文章管理页面结构，子标签栏不再跳动</li>
+<li><span class="cl-tag cl-opt">优化</span>文章管理切换更自然流畅</li>
+<li><span class="cl-tag cl-opt">优化</span>文章发送工具支持无筛选条件发送全部文章</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 工具返回结果超长时自动截断，避免撑爆上下文</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 对话轮次上限提升，复杂任务不再轻易中断</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 接口限流和服务端临时错误自动重试</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 调用代码去重，公众号生成/关键词提取/Agent 统一走公共 Client</li>
+<li><span class="cl-tag cl-opt">优化</span>飞书消息处理逻辑，会话历史与进度提示解耦</li>
+<li><span class="cl-tag cl-opt">优化</span>文章提取页面授权提示文案，与导航栏"公众号同步"名称统一</li>
+<li><span class="cl-tag cl-opt">优化</span>历史记录区域清理 Emoji，界面更简洁</li>
+<li><span class="cl-tag cl-opt">优化</span>容器与镜像名称统一为 wcan，便于识别管理</li>
+<li><span class="cl-tag cl-opt">优化</span>源码水印文案多样化，避免被一次性检索替换</li>
+</ul>
+<div class="cl-cat">三、系统重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-ref">重构</span>前端页面全面升级应用感设计，告别传统网页布局</li>
+<li><span class="cl-tag cl-ref">重构</span>设置页信息架构扁平化，引入入口卡片 + 二级页面切换</li>
+<li><span class="cl-tag cl-ref">重构</span>大量行内 style 抽取为语义化 CSS class</li>
+<li><span class="cl-tag cl-ref">重构</span>统一 modal / 弹窗 / 卡片 / 历史列表的视觉语言</li>
+<li><span class="cl-tag cl-ref">重构</span>文章管理三子页改为 task panel 切换机制</li>
+<li><span class="cl-tag cl-opt">优化</span>深色模式全面适配，所有组件统一走 CSS 变量</li>
+<li><span class="cl-tag cl-opt">优化</span>移除页面顶部两个冗余工作区框，界面更清爽</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.5 · 2026/6/25</div>
+<p class="cl-sub">更新日志规范化</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>更新日志标准模板文档</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>更新日志格式规范化</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.4 · 2026/6/25</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>索引重建后容器崩溃问题</li>
+<li><span class="cl-tag cl-fix">修复</span>词云生成导致 RSS 断联问题</li>
+<li><span class="cl-tag cl-fix">修复</span>索引重建后显示 Whoosh/ChromaDB 不可用</li>
+<li><span class="cl-tag cl-fix">修复</span>Debug 日志不显示的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>深色模式下本机信息/Debug 面板看不清的问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.3 · 2026/6/24</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>词云/索引重建导致RSS断联问题</li>
+<li><span class="cl-tag cl-fix">修复</span>RSS授权突然频繁失效问题</li>
+<li><span class="cl-tag cl-fix">修复</span>生成知识库词云失败问题</li>
+<li><span class="cl-tag cl-fix">修复</span>仅看词频失败问题</li>
+<li><span class="cl-tag cl-fix">修复</span>重建高级搜索索引失败问题</li>
+<li><span class="cl-tag cl-opt">优化</span>AI提示词修正</li>
+<li><span class="cl-tag cl-opt">优化</span>HarmonyOS Sans 显示问题</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>Debug 日志面板</li>
+<li><span class="cl-tag cl-new">新增</span>API debug 信息</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.2 · 2026/6/24</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>关键词索引进度条不动的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>历史记录同步后排序混乱的问题</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>docx 转 txt 进度条</li>
+<li><span class="cl-tag cl-new">新增</span>Sumy 摘要自动生成</li>
+<li><span class="cl-tag cl-new">新增</span>ChromaDB 语义搜索接入</li>
+<li><span class="cl-tag cl-new">新增</span>Wordcloud 词云可视化</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.1 · 2026/6/24</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>Docker镜像源管理</li>
+<li><span class="cl-tag cl-opt">优化</span>AI Agent 超时和重试改进</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.7.0 · 2026/6/24</div>
+<p class="cl-sub">开源库集成</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>Loguru 日志模块</li>
+<li><span class="cl-tag cl-new">新增</span>Diskcache 缓存模块</li>
+<li><span class="cl-tag cl-new">新增</span>Sumy 摘要模块</li>
+<li><span class="cl-tag cl-new">新增</span>newspaper3k 文章提取</li>
+<li><span class="cl-tag cl-new">新增</span>Whoosh 全文搜索</li>
+<li><span class="cl-tag cl-new">新增</span>ChromaDB 语义搜索</li>
+<li><span class="cl-tag cl-new">新增</span>Wordcloud 词云生成</li>
+<li><span class="cl-tag cl-new">新增</span>Huey 任务队列</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>开源协议新增8个开源库声明</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.8 · 2026/6/23</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>公众号生成后无法复制的问题</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>公众号生成清空按钮</li>
+<li><span class="cl-tag cl-new">新增</span>公众号生成重置模式</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.7 · 2026/6/23</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>导航栏显示</li>
+<li><span class="cl-tag cl-opt">优化</span>MCP工具性能</li>
+<li><span class="cl-tag cl-fix">修复</span>写作模式选择菜单无法选择的问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.6 · 2026/6/23</div>
+<p class="cl-sub">公众号生成功能正式上线</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>公众号生成功能</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>前端页面显示</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.5 · 2026/6/23</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>运营报告字数统计为0的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>运营报告公众号名称缺失的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>火山引擎默认模型名</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.4 · 2026/6/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>性能</li>
+<li><span class="cl-tag cl-opt">优化</span>Word 转 txt 支持增量更新</li>
+<li><span class="cl-tag cl-opt">优化</span>设置页面合并显示</li>
+<li><span class="cl-tag cl-opt">优化</span>每日一言位置显示</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 页面提示飞书 Bot</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.3 · 2026/6/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>文章管理 TAB 丢失的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>部分深色模式出现白色遮罩的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>logo更新为八奈见杏菜</li>
+<li><span class="cl-tag cl-opt">优化</span>禁止logo跳动</li>
+<li><span class="cl-tag cl-opt">优化</span>彩蛋</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.2 · 2026/6/22</div>
+<p class="cl-sub">深色模式全面修复</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>部分场景下深色模式显示异常的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>UI 统一</li>
+<li><span class="cl-tag cl-opt">优化</span>弹窗统一</li>
+<li><span class="cl-tag cl-opt">优化</span>移动端性能</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.1 · 2026/6/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>AI快捷操作精简</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.6.0 · 2026/6/22</div>
+<p class="cl-sub">功能重组</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>MCP 工具分组重组</li>
+<li><span class="cl-tag cl-opt">优化</span>前端页面重组</li>
+<li><span class="cl-tag cl-opt">优化</span>爬虫自动关键词提取</li>
+<li><span class="cl-tag cl-opt">优化</span>搜索功能</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.5 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>无日期文件漏网问题</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>飞书文章选择列表</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.4 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>更新日志时间线展开无效</li>
+<li><span class="cl-tag cl-opt">优化</span>关键词索引进度条显示问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.3 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>更新日志时间线展开空白问题</li>
+<li><span class="cl-tag cl-fix">修复</span>Word转KB误报"提交失败"问题</li>
+<li><span class="cl-tag cl-fix">修复</span>清空知识库残留问题</li>
+<li><span class="cl-tag cl-fix">修复</span>安全性问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.2 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>知识库关键词提取</li>
+<li><span class="cl-tag cl-opt">优化</span>深色模式</li>
+<li><span class="cl-tag cl-opt">优化</span>界面与体验</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.1 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>webdav_config.json 被识别为目录的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>飞书双向文件传输</li>
+</ul>
+<div class="cl-cat">二、未来计划</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-plan">计划</span>内置小模型关键词提取研究</li>
+<li><span class="cl-tag cl-plan">计划</span>适配晶晨A311D NPU</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.5.0 · 2026/6/21</div>
+<p class="cl-sub">技术重构</p>
+<div class="cl-cat">一、系统重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-ref">重构</span>ai agent功能</li>
+<li><span class="cl-tag cl-ref">重构</span>工具调用审计日志</li>
+<li><span class="cl-tag cl-ref">重构</span>ReAct 思维模式</li>
+<li><span class="cl-tag cl-ref">重构</span>AI 系统提示词模块</li>
+<li><span class="cl-tag cl-ref">重构</span>并行工具调用模块</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>时间筛选失效</li>
+<li><span class="cl-tag cl-fix">修复</span>排序错误、范围错误、输出不全的错误</li>
+<li><span class="cl-tag cl-fix">修复</span>mp_name 筛选字段错误</li>
+<li><span class="cl-tag cl-fix">修复</span>read_article_raw LIKE 转义缺失</li>
+<li><span class="cl-tag cl-opt">优化</span>MCP工具分组</li>
+<li><span class="cl-tag cl-opt">优化</span>自动推断功能</li>
+<li><span class="cl-tag cl-opt">优化</span>返回分组信息</li>
+<li><span class="cl-tag cl-opt">优化</span>翻译函数，支援国际化功能</li>
+<li><span class="cl-tag cl-opt">优化</span>worker 进程</li>
+<li><span class="cl-tag cl-opt">优化</span>API版本化及文档</li>
+<li><span class="cl-tag cl-opt">优化</span>通知系统插件化</li>
+<li><span class="cl-tag cl-opt">优化</span>docker构建部署问题</li>
+<li><span class="cl-tag cl-opt">优化</span>暗色模式</li>
+<li><span class="cl-tag cl-opt">优化</span>网页骨架</li>
+<li><span class="cl-tag cl-opt">优化</span>AI对话停止按钮</li>
+<li><span class="cl-tag cl-opt">优化</span>响应式tabbar</li>
+<li><span class="cl-tag cl-opt">优化</span>知识库增强</li>
+<li><span class="cl-tag cl-opt">优化</span>关键词自动索引</li>
+<li><span class="cl-tag cl-opt">优化</span>代码质量</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.7 · 2026/6/23</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>每日 8AM 早报</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-del">删除</span>部分通知辅助函数</li>
+<li><span class="cl-tag cl-opt">优化</span>文章关键词</li>
+<li><span class="cl-tag cl-opt">优化</span>文章替换自动索引</li>
+<li><span class="cl-tag cl-del">移除</span>预搜索模块（~140行）</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.6 · 2026/6/23</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>AI收取大量信息后无响应问题</li>
+<li><span class="cl-tag cl-opt">优化</span>真实日期注入</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 记忆上限</li>
+<li><span class="cl-tag cl-fix">修复</span>通知测试功能</li>
+<li><span class="cl-tag cl-fix">修复</span>文章搜索功能</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.5 · 2026/6/21</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>AI回复格式</li>
+<li><span class="cl-tag cl-opt">优化</span>微信RSS登录逻辑</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>清空知识库</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.3 · 2026/6/21</div>
+<p class="cl-sub">AI Agent 工具调用强制规则</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>AI 快捷操作菜单——AI 聊天界面新增一键弹出菜单，覆盖搜索、查找、格式化等常用指令，点击即发送</li>
+<li><span class="cl-tag cl-new">新增</span>飞书自动刷新微信登录二维码并推送</li>
+<li><span class="cl-tag cl-new">新增</span>飞书图片消息推送</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>工具列表与mcp_server.py同步</li>
+<li><span class="cl-tag cl-fix">修复</span>AI 搜索逻辑问题</li>
+<li><span class="cl-tag cl-fix">修复</span>KB 转换逻辑问题</li>
+<li><span class="cl-tag cl-opt">优化</span>开源协议界面信息</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.2 · 2026/6/20</div>
+<p class="cl-sub">优化飞书功能</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>飞书文章替换功能</li>
+<li><span class="cl-tag cl-new">新增</span>飞书系统通知功能</li>
+<li><span class="cl-tag cl-new">新增</span>飞书列出未修改文章标题功能</li>
+<li><span class="cl-tag cl-new">新增</span>飞书替换修改后文章功能</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>存储年份扫描</li>
+<li><span class="cl-tag cl-fix">修复</span>KB 转换【改】文件逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>word_to_text ZIP 预检</li>
+<li><span class="cl-tag cl-opt">优化</span>依赖启动自检</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.1 · 2026/6/20</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>部分语法错误问题</li>
+<li><span class="cl-tag cl-fix">修复</span>Knowledge Base 转换失败问题</li>
+<li><span class="cl-tag cl-fix">修复</span>Knowledge base 目录无法持久化问题</li>
+<li><span class="cl-tag cl-fix">修复</span>容器启动 Permission denied问题</li>
+<li><span class="cl-tag cl-opt">优化</span>AI Agent 全链路日志显示</li>
+<li><span class="cl-tag cl-opt">优化</span>KB 转换日志</li>
+<li><span class="cl-tag cl-opt">优化</span>存储年份扫描日志</li>
+<li><span class="cl-tag cl-opt">优化</span>pip 启动自检</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.1.0 · 2026/6/20</div>
+<p class="cl-sub">把 MCP 工具搬到飞书里</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>飞书 Bot 接入</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.0.1 · 2026/6/20</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>扫描年份失效问题</li>
+<li><span class="cl-tag cl-fix">修复</span>DeepSeek BaseUrl错误问题</li>
+<li><span class="cl-tag cl-fix">修复</span>无法显示异常静默问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v4.0.0 · 2026/6/20</div>
+<p class="cl-sub">现升级为「编舟文心」</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>MCP</li>
+<li><span class="cl-tag cl-new">新增</span>AI工具调用窗口</li>
+<li><span class="cl-tag cl-new">新增</span>多模型切换</li>
+<li><span class="cl-tag cl-new">新增</span>数据库功能</li>
+<li><span class="cl-tag cl-new">新增</span>一键转化文章数据库功能</li>
+<li><span class="cl-tag cl-new">新增</span>存储结构选择功能</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>下拉菜单风格</li>
+<li><span class="cl-tag cl-opt">优化</span>移动端显示</li>
+<li><span class="cl-tag cl-opt">优化</span>AI 对话框自适应</li>
+<li><span class="cl-tag cl-opt">优化</span>中文名「编舟文心」</li>
+<li><span class="cl-tag cl-fix">修复</span>联系作者处错误logo</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.5.3 · 2026/6/17</div>
+<p class="cl-sub">全力优化中</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>通知渠道自定义开关</li>
+<li><span class="cl-tag cl-new">新增</span>WebDAV 多配置——从单项升级为多项列表结构，支持新增、切换、删除和选择当前编辑项</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>通知内容</li>
+<li><span class="cl-tag cl-opt">优化</span>Webhook 和 ServerChan 弹窗配置模式</li>
+<li><span class="cl-tag cl-opt">优化</span>开源协议弹窗头尾固定</li>
+<li><span class="cl-tag cl-opt">优化</span>设置页子标签显示</li>
+<li><span class="cl-tag cl-opt">优化</span>关于页</li>
+<li><span class="cl-tag cl-opt">优化</span>联系作者四个按钮风格图标</li>
+<li><span class="cl-tag cl-fix">修复</span>处理日志框恢复可见样式</li>
+<li><span class="cl-tag cl-fix">修复</span>WebDAV 配置加载乱码的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>测试通知通知类型开关误拦的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>通知矩阵开关样式错位的问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.5.0 · 2026/6/12</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>任务完成通知补全公众号清单</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>更新日志显示横向滚动条</li>
+<li><span class="cl-tag cl-opt">优化</span>邮件标识版本号同步</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.9 · 2026/6/6</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>国内邮箱预设</li>
+<li><span class="cl-tag cl-new">新增</span>邮件双模</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>发送失败自动重试的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>保存按钮状态锁死</li>
+<li><span class="cl-tag cl-fix">修复</span>邮件开关热区异常</li>
+<li><span class="cl-tag cl-fix">修复</span>163邮箱端口修正</li>
+<li><span class="cl-tag cl-opt">优化</span>选择框风格统一</li>
+<li><span class="cl-tag cl-opt">优化</span>下拉组件统一风格</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.8 · 2026/6/6</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>邮件通知功能</li>
+<li><span class="cl-tag cl-new">新增</span>全链路任务完成通知</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>批量/单篇更新成功时无通知问题</li>
+<li><span class="cl-tag cl-fix">修复</span>单篇文章提取失败无通知</li>
+<li><span class="cl-tag cl-opt">优化</span>Webhook + ServerChan + Email 三通道分发问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.7 · 2026/6/5</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>KeyError 崩溃问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.6 · 2026/6/5</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>【改】版本识别失效问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.5 · 2026/6/5</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>爬虫404检测逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>爬虫重定向检测</li>
+<li><span class="cl-tag cl-opt">优化</span>时区统一问题</li>
+<li><span class="cl-tag cl-opt">优化</span>版本一致性校验</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.4 · 2026/6/5</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>通知重复轰炸问题</li>
+<li><span class="cl-tag cl-fix">修复</span>同步间隔失效问题</li>
+<li><span class="cl-tag cl-fix">修复</span>版本号不同步</li>
+<li><span class="cl-tag cl-opt">优化</span>每日一言时区统一为北京时间</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.3 · 2026/6/4</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>统一磁盘缓存管理器</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>历史记录日期排序</li>
+<li><span class="cl-tag cl-fix">修复</span>更新时崩溃</li>
+<li><span class="cl-tag cl-opt">优化</span>缓存定时刷新</li>
+<li><span class="cl-tag cl-opt">优化</span>容器时区同步</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.2 · 2026/6/4</div>
+<p class="cl-sub">你说什么啊？</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>清空历史记录</li>
+<li><span class="cl-tag cl-new">新增</span>密码校验</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-del">删除</span>文章提取区任务状态面板</li>
+<li><span class="cl-tag cl-fix">修复</span>爬取失败通知去重</li>
+<li><span class="cl-tag cl-fix">修复</span>爬取重试机制</li>
+<li><span class="cl-tag cl-opt">优化</span>前端状态同步</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.1 · 2026/6/4</div>
+<p class="cl-sub">苹果派！</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>历史记录日期归类</li>
+<li><span class="cl-tag cl-fix">修复</span>单篇爬取后历史记录不刷新</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.4.0 · 2026/6/4</div>
+<p class="cl-sub">芳草连天夏日长，孤钟迟响过空廊。槐影深深无人语，石阶依旧锁斜阳。风过广庭尘未定，花开一瞬落未央。谁问往事如烟去，但留回响在人旁。</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-del">移除</span>过期提醒通知</li>
+<li><span class="cl-tag cl-fix">修复</span>手动提取任务调度</li>
+<li><span class="cl-tag cl-fix">修复</span>更新日志底部多余文本</li>
+<li><span class="cl-tag cl-opt">优化</span>历史记录模块</li>
+<li><span class="cl-tag cl-opt">优化</span>定时任务逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>定时器时停能力</li>
+<li><span class="cl-tag cl-opt">优化</span>历史记录 publish_time 字段</li>
+<li><span class="cl-tag cl-opt">优化</span>历史文件命名问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.5 · 2026/5/22</div>
+<p class="cl-sub">C属性大爆发！</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>历史记录同步本地按钮</li>
+<li><span class="cl-tag cl-new">新增</span>文章替换加【改】标记</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>历史记录提取逻辑问题</li>
+<li><span class="cl-tag cl-fix">修复</span>历史记录空列表判空逻辑</li>
+<li><span class="cl-tag cl-fix">修复</span>前端任务状态空白问题</li>
+<li><span class="cl-tag cl-fix">修复</span>批量提取文章"无法找到文章内容"但单篇正常问题</li>
+<li><span class="cl-tag cl-fix">修复</span>running 卡死问题</li>
+<li><span class="cl-tag cl-fix">修复</span>定时任务导入失败</li>
+<li><span class="cl-tag cl-fix">修复</span>历史记录量级对齐</li>
+<li><span class="cl-tag cl-fix">修复</span>历史记录排序</li>
+<li><span class="cl-tag cl-fix">修复</span>同步本地逻辑问题</li>
+<li><span class="cl-tag cl-fix">修复</span>批量完成后前端同步问题</li>
+<li><span class="cl-tag cl-opt">优化</span>历史记录卡片显示效果</li>
+<li><span class="cl-tag cl-opt">优化</span>同步本地按钮配色跟随主题</li>
+<li><span class="cl-tag cl-opt">优化</span>合并去重逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>信息固化</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.4 · 2026/5/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>Illegal seek</li>
+<li><span class="cl-tag cl-fix">修复</span>单篇提取的时序问题</li>
+<li><span class="cl-tag cl-fix">修复</span>项目目录冗余问题</li>
+<li><span class="cl-tag cl-fix">修复</span>批量提取部分文章"无法找到文章内容"但单篇正常的情况</li>
+<li><span class="cl-tag cl-fix">修复</span>任务完成后状态显示错误的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>定时任务导入失败问题</li>
+<li><span class="cl-tag cl-fix">修复</span>历史记录空列表判空逻辑</li>
+<li><span class="cl-tag cl-fix">修复</span>单篇提取进度条不动问题</li>
+<li><span class="cl-tag cl-opt">优化</span>文章提取运行日志</li>
+<li><span class="cl-tag cl-opt">优化</span>单篇提取流程</li>
+<li><span class="cl-tag cl-opt">优化</span>单篇提取逻辑问题</li>
+<li><span class="cl-tag cl-opt">优化</span>批量提取状态追踪</li>
+<li><span class="cl-tag cl-opt">优化</span>临时图片文件后缀格式问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.3 · 2026/5/22</div>
+<p class="cl-sub">升级Python，修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>Illegal seek</li>
+<li><span class="cl-tag cl-fix">修复</span>批量提取后 running 状态永卡True，导致前台永远显示"已有任务在运行"</li>
+<li><span class="cl-tag cl-fix">修复</span>单篇提取接口调用空返回值导致任务提交后前端无反馈</li>
+<li><span class="cl-tag cl-opt">优化</span>基础镜像升级</li>
+<li><span class="cl-tag cl-del">清理</span>Dockerfile 中废弃的 apt 源 sed 替换及无引用系统包（wget/unzip/curl/gnupg）</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>任务线程崩溃时强制释放 running 状态</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.2 · 2026/5/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>偶发 NoneType 报错问题</li>
+<li><span class="cl-tag cl-fix">修复</span>多图文发文只获取首篇问题</li>
+<li><span class="cl-tag cl-fix">修复</span>运行日志空白问题</li>
+<li><span class="cl-tag cl-fix">修复</span>进度条时序Bug</li>
+<li><span class="cl-tag cl-fix">修复</span>Illegal seek 问题</li>
+<li><span class="cl-tag cl-fix">修复</span>Word文档产出乱码问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.1 · 2026/5/22</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>历史记录错误现实问题</li>
+<li><span class="cl-tag cl-fix">修复</span>WebDAV配置页字体文件缺失问题</li>
+<li><span class="cl-tag cl-fix">修复</span>更新时核心文件被只读挂载问题</li>
+<li><span class="cl-tag cl-opt">优化</span>历史word重复判定问题</li>
+<li><span class="cl-tag cl-opt">优化</span>Dockerfile</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>文章爬取二次验证逻辑</li>
+<li><span class="cl-tag cl-new">新增</span>独立爬取历史追踪</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.3.0 · 2026/5/22</div>
+<p class="cl-sub">技术重构</p>
+<div class="cl-cat">一、重大重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-ref">重构</span>文章提取逻辑</li>
+<li><span class="cl-tag cl-ref">重构</span>构建体系，合并 x86/ARM 容器镜像为统一构建</li>
+<li><span class="cl-tag cl-ref">重构</span>WebDAV配置界面</li>
+</ul>
+<div class="cl-cat">二、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>RSS未授权时自动发送通知提醒</li>
+<li><span class="cl-tag cl-new">新增</span>同步日志底部展示"略过的文章"列表</li>
+<li><span class="cl-tag cl-new">新增</span>文章爬取失败即时通知推送</li>
+</ul>
+<div class="cl-cat">三、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>RSS微信授权，修复Docker重启后授权状态丢失问题</li>
+<li><span class="cl-tag cl-opt">优化</span>多篇提取时日志显示，与单篇提取同样详细</li>
+<li><span class="cl-tag cl-opt">优化</span>开源组件鸣谢列表</li>
+<li><span class="cl-tag cl-opt">优化</span>文章日期提取准确性</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.2.1 · 2026/5/21</div>
+<p class="cl-sub">在小小的数据库里修啊修啊修</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>BytesIO冲突问题（Illegal seek）</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.2.0 · 2026/5/21</div>
+<p class="cl-sub">办公室风水不会有问题吧？怎么刚搬来就出BUG了！👻</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>文章获取错误（'dict' object is not callable）</li>
+<li><span class="cl-tag cl-fix">修复</span>BytesIO冲突问题（Illegal seek）</li>
+<li><span class="cl-tag cl-fix">修复</span>联系作者弹窗邮箱、QQ号无法复制的问题</li>
+<li><span class="cl-tag cl-opt">优化</span>文章获取逻辑</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.1.2 · 2026/5/22</div>
+<p class="cl-sub">关注塔菲喵！关注塔菲谢谢喵！</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>界面刷新按钮</li>
+<li><span class="cl-tag cl-new">新增</span>联系作者方式</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>每日一言内容量</li>
+<li>为接入AI做项目铺垫</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.1.1 · 2026/5/20</div>
+<p class="cl-sub">到底是谁要过520啊，不过不过😭</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>每日一言的显示</li>
+<li><span class="cl-tag cl-opt">优化</span>每日一言逻辑</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.1.0 · 2026/5/18</div>
+<p class="cl-sub">抽了一根煊赫门🚬</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>每日一言</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>更新日志显示形式</li>
+<li><span class="cl-tag cl-opt">优化</span>禁止复制页面内文字</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.6 · 2026/5/18</div>
+<p class="cl-sub">吃了一块提拉米苏🍰</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>授权状态逻辑</li>
+<li><span class="cl-tag cl-fix">修复</span>系统更新后微信授权及通知token异常的问题</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.5 · 2026/5/18</div>
+<p class="cl-sub">喝了一杯咖啡☕️</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>软件更新后自动重启选项</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>授权状态逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>更新日志显示</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.4 · 2026/5/18</div>
+<p class="cl-sub">移动端显示优化</p>
+<div class="cl-cat">一、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>移动端显示</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.3 · 2026/5/18</div>
+<p class="cl-sub">修复已知问题</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>更新后重启应用选项</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>软件更新逻辑</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.2 · 2026/5/18</div>
+<p class="cl-sub">细节优化与问题修复</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>软件离线更新功能</li>
+<li><span class="cl-tag cl-new">新增</span>同步文章数自定义功能</li>
+</ul>
+<div class="cl-cat">二、优化修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>文章提取分页补全逻辑</li>
+<li><span class="cl-tag cl-opt">优化</span>首页运行日志</li>
+<li><span class="cl-tag cl-opt">优化</span>开源协议</li>
+<li><span class="cl-tag cl-opt">优化</span>移动端显示，避免遮挡</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.1 · 2026/5/18</div>
+<p class="cl-sub">重大架构升级：集成微信公众平台原生订阅体系</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">新增</span>微信公众平台扫码登录功能</li>
+<li><span class="cl-tag cl-new">新增</span>公众号搜索与订阅功能</li>
+<li><span class="cl-tag cl-new">新增</span>公众号文章批量提取功能</li>
+<li><span class="cl-tag cl-new">新增</span>Token 过期动态提醒功能</li>
+<li><span class="cl-tag cl-new">新增</span>同步状态实时反馈功能</li>
+<li><span class="cl-tag cl-new">新增</span>授权状态面板</li>
+</ul>
+<div class="cl-cat">二、新增优化</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>文章提取逻辑功能</li>
+<li><span class="cl-tag cl-opt">优化</span>定时任务功能</li>
+<li><span class="cl-tag cl-opt">优化</span>文章提取时注入微信cookie</li>
+</ul>
+<div class="cl-cat">三、架构重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-new">引入</span>werss 核心引擎</li>
+<li><span class="cl-tag cl-opt">升级</span>数据库SQLAlchemy+SQLite</li>
+</ul>
+<div class="cl-cat">四、菜单重构</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>菜单界面</li>
+</ul>
+<div class="cl-cat">五、问题修复</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>二维码获取 session headers 污染导致空响应的问题</li>
+<li><span class="cl-tag cl-fix">修复</span>wx.lic YAML 格式与 app.py json.load 不匹配导致授权状态无法读取</li>
+<li><span class="cl-tag cl-fix">修复</span>定时设置下拉菜单 class toggle 与 CSS display 冲突</li>
+<li><span class="cl-tag cl-fix">修复</span>首页授权状态面板默认隐藏</li>
+<li><span class="cl-tag cl-fix">修复</span>Crawler 不带微信 Cookie 导致部分文章只能获取摘要</li>
+<li><span class="cl-tag cl-fix">修复</span>多项模块导入路径错误与语法问题</li>
+</ul>
+<div class="cl-cat">六、兼容性</div>
+<ul class="cl-list">
+<li>统一 x86_64 与 ARM64</li>
+</ul>
+<hr class="cl-hr">
+
+<div class="cl-ver">v3.0.0 · 2026/5/16</div>
+<p class="cl-sub">强烈推荐 DeepSeek V4 Pro，梁圣伟大，无需多言。</p>
+<div class="cl-cat">一、新增功能</div>
+<ul class="cl-list">
+<li>界面全面焕新，适配光感模糊视觉效果</li>
+<li><span class="cl-tag cl-new">新增</span>节日、纪念日自动切换界面配色</li>
+<li><span class="cl-tag cl-new">新增</span>一键文件替换功能，告别手动替换操作</li>
+<li><span class="cl-tag cl-new">新增</span>WebDAV 同步功能（目前功能尚未完善，持续迭代）</li>
+<li><span class="cl-tag cl-new">新增</span>文件处理数量计数统计功能</li>
+<li><span class="cl-tag cl-new">新增</span>RSS 资讯更新实时提醒</li>
+<li><span class="cl-tag cl-new">新增</span>本机设备信息可视化展示</li>
+</ul>
+<div class="cl-cat">二、体验优化</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-opt">优化</span>转载文章跳过执行速度</li>
+<li><span class="cl-tag cl-opt">优化</span>重复文章检测机制，自动跳过重复任务</li>
+<li><span class="cl-tag cl-opt">优化</span>移动端显示效果，适配液态玻璃效果</li>
+</ul>
+<div class="cl-cat">三、问题修复与组件调整</div>
+<ul class="cl-list">
+<li><span class="cl-tag cl-fix">修复</span>多项已知 BUG，提升整体运行流畅度</li>
+<li><span class="cl-tag cl-del">移除</span>Chromium 组件，替换为轻量化无头浏览器</li>
+</ul>
