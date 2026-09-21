@@ -526,28 +526,40 @@ def save_storage_year():
 # ==================== 在线更新 API ====================
 
 # Gitee 在线更新源（只读检查：只提示新版本并给出下载地址，不执行任何拉取/覆盖）
-GITEE_VERSION_URL = "https://gitee.com/AZSongguo/wcan/raw/main/version.json"
-GITEE_RELEASE_PAGE = "https://gitee.com/AZSongguo/wcan/releases"
+# 采用公开 Release 附件方案：release.bat 把 version.json 和 exe zip 传成附件。
+# 注意：Gitee 对 api/v5 的匿名请求有限制（403），因此解析 releases 网页拿附件直链。
+GITEE_RELEASES_PAGE = "https://gitee.com/AZSongguo/wcan/releases"
 
 
 def _check_online_version():
-    """从 Gitee 读取 version.json，与当前版本比较。任何失败都静默降级为 None。"""
+    """读 Gitee 最新 Release 页面的 version.json 附件，与当前版本比较。
+
+    任何失败（网络、无 Release、无附件）都静默降级为 None，不影响主流程。
+    """
     import requests as _rq
     try:
-        resp = _rq.get(GITEE_VERSION_URL, timeout=6,
-                       headers={'Cache-Control': 'no-cache'})
-        if resp.status_code != 200:
+        H = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+        page = _rq.get(GITEE_RELEASES_PAGE, timeout=8, headers=H)
+        if page.status_code != 200:
             return None
-        data = resp.json()
+        # 取第一个（最新）Release 的 version.json 附件直链
+        links = re.findall(r'href="(/AZSongguo/wcan/releases/download/[^"]+)"', page.text)
+        meta_path = next((l for l in links if l.endswith('/version.json')), None)
+        zip_path = next((l for l in links if l.endswith('.zip')), None)
+        if not meta_path:
+            return None
+        meta = _rq.get('https://gitee.com' + meta_path, timeout=8, headers=H)
+        if meta.status_code != 200:
+            return None
+        data = meta.json()
         latest = str(data.get('version', '')).strip()
         if not latest:
             return None
-        latest_clean = latest.lstrip('vV')
-        has_new = parse_version(latest_clean) > parse_version(__version__)
+        has_new = parse_version(latest.lstrip('vV')) > parse_version(__version__)
         return {
             'version': latest,
-            'notes': data.get('notes', ''),
-            'url': data.get('download_url') or GITEE_RELEASE_PAGE,
+            'notes': data.get('notes') or '',
+            'url': ('https://gitee.com' + zip_path) if zip_path else GITEE_RELEASES_PAGE,
             'has_new': has_new,
         }
     except Exception:
