@@ -34,3 +34,7 @@ venv/
 
 # 微信登录二维码（随时效失效，且属于个人登录态）
 static/wx_qrcode.png
+
+# 商业字体不入库（版权）：本地保留、按需自行放置
+simhei.ttf
+仿宋_GB2312.ttf

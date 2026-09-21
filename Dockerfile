@@ -52,8 +52,9 @@ COPY --from=builder /install /usr/local
 WORKDIR /app
 
 # 字体文件
-COPY 仿宋_GB2312.ttf /usr/share/fonts/
-COPY simhei.ttf /usr/share/fonts/
+# 商业字体不入库（版权）。如需服务端中文字体，将 ttf 放到构建目录后取消注释：
+# COPY 仿宋_GB2312.ttf /usr/share/fonts/
+# COPY simhei.ttf /usr/share/fonts/
 
 # 应用代码
 COPY . .
