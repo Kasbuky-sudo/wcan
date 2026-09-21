@@ -52,6 +52,7 @@ python -m PyInstaller --noconfirm --onefile --noconsole --name "±àÖÛÎÄÐÄ" ^
   --add-data "%~dp0config.yaml;." ^
   --add-data "%~dp0notify_config.example.json;." ^
   --add-data "%~dp0webdav_config.example.json;." ^
+  --add-data "%~dp0weixin.jpg;." ^
   --collect-submodules app --collect-submodules werss --collect-submodules jobs ^
   --hidden-import init_sys --hidden-import crawler --hidden-import paths ^
   --hidden-import webview.platforms.winforms --hidden-import clr ^
