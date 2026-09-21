@@ -4332,7 +4332,21 @@ function tripleClickClear(btn) { /* 由 addEventListener 处理三击逻辑 */ }
             updateLogBox.textContent = '';
             updateRestartArea.style.display = 'none';
             updateCurrentVer.textContent = data.current_version || '未知';
-            if (data.available && data.available.length > 0) {
+            var online = data.online;
+            if (online && online.has_new) {
+                updateAvailableList.innerHTML =
+                    '<div style="background:var(--color-primary-light); border-radius:6px; padding:12px; margin-bottom:8px; border:1px solid var(--color-ui-border-default);">' +
+                    '<div style="display:flex; align-items:center; gap:8px;">' +
+                    '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-success-default); flex-shrink:0;"></span>' +
+                    '<span style="font-weight:600; color:var(--color-primary);">v' + online.version + '</span>' +
+                    '</div>' +
+                    (online.notes ? '<div style="font-size:12px; color:var(--color-text-secondary); margin-top:4px;">' + online.notes + '</div>' : '') +
+                    '<div style="margin-top:10px;"><a class="app-btn app-btn-primary" href="' + online.url + '" target="_blank" style="text-decoration:none;">' +
+                    '<i class="icons10-download"></i><span>前往下载新版本</span></a></div>' +
+                    '</div>';
+                updateDoBtn.style.display = 'none';
+                document.getElementById('updateChangelogArea').style.display = 'none';
+            } else if (data.available && data.available.length > 0) {
                 updateAvailableList.innerHTML = data.available.map(function(u) {
                     return '<div style="background:var(--color-primary-light); border-radius:6px; padding:12px; margin-bottom:8px; border:1px solid var(--color-ui-border-default);">' +
                         '<div style="display:flex; align-items:center; gap:8px;">' +
@@ -4343,6 +4357,10 @@ function tripleClickClear(btn) { /* 由 addEventListener 处理三击逻辑 */ }
                 updateDoBtn.style.display = 'inline-flex';
                 document.getElementById('updateChangelogArea').style.display = 'block';
                 loadChangelogInto('updateChangelogBrief', data.available[0].folder);
+            } else if (online && !online.has_new) {
+                updateAvailableList.innerHTML = '<div style="text-align:center; padding:16px 0; color:var(--color-text-secondary); font-size:13px;"><i class="icons10-checkmark" style="color:var(--color-success-default);"></i> 当前已是最新版本</div>';
+                updateDoBtn.style.display = 'none';
+                document.getElementById('updateChangelogArea').style.display = 'none';
             } else {
                 updateAvailableList.innerHTML = '<div style="text-align:center; padding:16px 0; color:var(--color-text-secondary); font-size:13px;"><i class="icons10-checkmark" style="color:var(--color-success-default);"></i> 当前已是最新版本</div>';
                 updateDoBtn.style.display = 'none';

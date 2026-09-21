@@ -525,33 +525,74 @@ def save_storage_year():
 
 # ==================== 在线更新 API ====================
 
+# Gitee 在线更新源（只读检查：只提示新版本并给出下载地址，不执行任何拉取/覆盖）
+GITEE_VERSION_URL = "https://gitee.com/AZSongguo/wcan/raw/main/version.json"
+GITEE_RELEASE_PAGE = "https://gitee.com/AZSongguo/wcan/releases"
+
+
+def _check_online_version():
+    """从 Gitee 读取 version.json，与当前版本比较。任何失败都静默降级为 None。"""
+    import requests as _rq
+    try:
+        resp = _rq.get(GITEE_VERSION_URL, timeout=6,
+                       headers={'Cache-Control': 'no-cache'})
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+        latest = str(data.get('version', '')).strip()
+        if not latest:
+            return None
+        latest_clean = latest.lstrip('vV')
+        has_new = parse_version(latest_clean) > parse_version(__version__)
+        return {
+            'version': latest,
+            'notes': data.get('notes', ''),
+            'url': data.get('download_url') or GITEE_RELEASE_PAGE,
+            'has_new': has_new,
+        }
+    except Exception:
+        return None
+
+
 @bp.route('/api/update/check', methods=['GET'])
 def check_update():
     update_dir = get_update_dir()
-    if not os.path.isdir(update_dir):
-        return jsonify({'success': True, 'current_version': __version__, 'available': [], 'message': '未配置更新目录'})
     current_ver = parse_version(__version__)
     available = []
-    try:
-        for entry in os.listdir(update_dir):
-            entry_path = os.path.join(update_dir, entry)
-            if not os.path.isdir(entry_path):
-                continue
-            m = re.match(r'WCAN[_\-\s]*v([\d]+[\.\d]*(?:[a-zA-Z]*[\d]*))\s*[_\-\s]*update', entry, re.IGNORECASE)
-            if not m:
-                continue
-            ver_str = m.group(1)
-            ver = parse_version(ver_str)
-            if ver > current_ver:
-                available.append({
-                    'version': 'v' + ver_str,
-                    'folder': entry,
-                    'path': entry_path
-                })
-        available.sort(key=lambda x: parse_version(x['version']), reverse=True)
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e), 'current_version': __version__})
-    return jsonify({'success': True, 'current_version': __version__, 'available': available})
+    message = ''
+    # 1) 本地离线更新包（原有机制）
+    if os.path.isdir(update_dir):
+        try:
+            for entry in os.listdir(update_dir):
+                entry_path = os.path.join(update_dir, entry)
+                if not os.path.isdir(entry_path):
+                    continue
+                m = re.match(r'WCAN[_\-\s]*v([\d]+[\.\d]*(?:[a-zA-Z]*[\d]*))\s*[_\-\s]*update', entry, re.IGNORECASE)
+                if not m:
+                    continue
+                ver_str = m.group(1)
+                ver = parse_version(ver_str)
+                if ver > current_ver:
+                    available.append({
+                        'version': 'v' + ver_str,
+                        'folder': entry,
+                        'path': entry_path
+                    })
+            available.sort(key=lambda x: parse_version(x['version']), reverse=True)
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e), 'current_version': __version__})
+    else:
+        message = '未配置离线更新目录'
+
+    # 2) Gitee 在线源（只读：仅提示新版本并给出下载地址）
+    online = _check_online_version()
+    return jsonify({
+        'success': True,
+        'current_version': __version__,
+        'available': available,
+        'message': message,
+        'online': online,
+    })
 
 @bp.route('/api/update/do', methods=['POST'])
 @require_auth
