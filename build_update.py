@@ -18,6 +18,8 @@ SKIP_FILES = {
     "crawl_history.json", "history.json", "rss_feeds.json",
     "docker-compose.yml", "build_update.py", "debug-illegal-seek-progress.md",
     "weixin.jpg", "weixin.png", ".dockerignore", "pip.conf",
+    # 商业字体不进仓库也不进更新包（Word 导出只用字体名，不需要字体文件）
+    "simhei.ttf", "仿宋_GB2312.ttf",
 }
 
 
