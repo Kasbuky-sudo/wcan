@@ -9,5 +9,8 @@ __pycache__
 文章
 data
 update
+# 商业字体不入库（版权），更不能被 COPY . . 打进镜像
+simhei.ttf
+仿宋_GB2312.ttf
 *.md
 .DS_Store

@@ -248,5 +248,5 @@ git remote set-url --add --push origin git@gitee.com:<账号>/<仓库>.git
 
 - `.gitignore` 已排除 `.env`、`notify_config.json`、`webdav_config.json`、`data/`、`文章/`、`update/`、`.venv/`、日志与缓存。
 - `config.yaml` 要提交（本身不含密钥，密码走 `.env`）。
-- `simhei.ttf`(9.5MB) 和 `仿宋_GB2312.ttf`(3.9MB) 是生成 Word 必需的，Dockerfile 会 `COPY` 它们，所以要提交；介意体积可以用 Git LFS。
+- `simhei.ttf` / `仿宋_GB2312.ttf` **不入库**：商业字体版权，仓库转公开时已移除，`.gitignore` 也已排除。生成 Word 时程序只把字体名写进文档、不读取字体文件，所以仓库和 exe 都不需要它们；文档最终长什么样，取决于打开文档那台机器装了什么字体。Dockerfile 的字体 `COPY` 与 docker-compose 的字体挂载都已注释，确实需要容器内有中文字体时再自行放开。
 - 提交前 `git status --short` 自查一遍，确认没有把 `.env` 和两个 json 配置文件带上去。
