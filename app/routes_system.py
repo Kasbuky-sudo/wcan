@@ -608,6 +608,20 @@ def _online_payload(source, version, notes, urls, page_url):
     }
 
 
+def _json_safe(resp):
+    """宽容解析 JSON 响应。
+
+    别人（比如 PowerShell 5.1 的 Set-Content -Encoding UTF8）写出来的 version.json
+    会带 UTF-8 BOM，requests 的 .json() 遇到 BOM 直接抛 JSONDecodeError，
+    整个在线检查会静默失效，所以这里兜一层 utf-8-sig。
+    """
+    try:
+        return resp.json()
+    except Exception:
+        import json as _json
+        return _json.loads(resp.content.decode('utf-8-sig', 'replace'))
+
+
 def _check_online_github():
     """读 GitHub 最新 Release（公开仓库匿名可读）。任何失败都返回 None。"""
     import requests as _rq
@@ -616,7 +630,7 @@ def _check_online_github():
                     headers={**_ONLINE_UA, 'Accept': 'application/vnd.github+json'})
         if r.status_code != 200:
             return None
-        rel = r.json() or {}
+        rel = _json_safe(r) or {}
         tag = str(rel.get('tag_name') or '').strip()
         if not tag:
             return None
@@ -631,7 +645,7 @@ def _check_online_github():
         if urls['meta_url']:
             m = _rq.get(urls['meta_url'], timeout=8, headers=_ONLINE_UA)
             if m.status_code == 200:
-                meta = m.json() or {}
+                meta = _json_safe(m) or {}
         body = (rel.get('body') or '').strip()
         notes = meta.get('notes') or (body.splitlines()[0] if body else '')
         return _online_payload('github', meta.get('version') or tag, notes, urls,
@@ -658,7 +672,7 @@ def _check_online_gitee():
         meta = _rq.get(urls['meta_url'], timeout=8, headers=_ONLINE_UA)
         if meta.status_code != 200:
             return None
-        data = meta.json() or {}
+        data = _json_safe(meta) or {}
         return _online_payload('gitee', data.get('version'), data.get('notes'), urls, GITEE_RELEASES_PAGE)
     except Exception:
         return None

@@ -74,18 +74,18 @@ if not exist "dist\%ZIP%" (
 echo       已生成: dist\%ZIP%
 
 rem ================= 4. 更新 version.json 并提交推送 =================
-echo [4/7] 更新 version.json 并推送...
-powershell -NoProfile -Command ^
-  "$j = Get-Content version.json -Raw -Encoding UTF8 | ConvertFrom-Json;" ^
-  "$j.version = '%VER%';" ^
-  "$j.updated_at = Get-Date -Format 'yyyy-MM-dd';" ^
-  "$j | ConvertTo-Json | Set-Content version.json -Encoding UTF8"
-git add version.json
+echo [4/7] 更新 version.json / config.yaml 并推送...
+rem 用 Python 写：PowerShell 5.1 的 -Encoding UTF8 会带 BOM，而应用是用 requests 的 json() 读这个文件的，
+rem 带 BOM 会直接解析失败，导致部员的「检查更新」静默失效（一直显示已是最新）
+python -c "import io,json,datetime; p='version.json'; d=json.load(io.open(p,encoding='utf-8-sig')); d['version']='%VER%'; d['updated_at']=datetime.date.today().isoformat(); io.open(p,'w',encoding='utf-8',newline='').write(json.dumps(d,ensure_ascii=False,indent=2)+chr(10))"
+rem config.yaml 的 version 也要跟着走：应用启动时会校验两处一致（以前是 Docker 的 entrypoint 在同步）
+python -c "import io,re; p='config.yaml'; s=io.open(p,encoding='utf-8').read(); s=re.sub(r'(?m)^version:.*$','version: %VER%',s); io.open(p,'w',encoding='utf-8',newline='').write(s)"
+git add version.json config.yaml
 git diff --cached --quiet
 if errorlevel 1 (
     git commit -m "chore: release v%VER%"
 ) else (
-    echo       version.json 无变化
+    echo       版本文件无变化
 )
 git push origin main
 if errorlevel 1 (
