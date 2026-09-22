@@ -1,5 +1,11 @@
 # © SONGJUNSONG · Jilin Business and Technology College · School of Finance and Economics
 """系统管理、在线更新、一言路由"""
+import os
+import sys
+import shutil
+import subprocess
+import tempfile
+import zipfile
 from flask import Blueprint, request, jsonify
 from .core import *
 from .core import (
@@ -556,44 +562,111 @@ def save_storage_base_dir():
 # ==================== 在线更新 API ====================
 
 # Gitee 在线更新源（只读检查：只提示新版本并给出下载地址，不执行任何拉取/覆盖）
-# 采用公开 Release 附件方案：release.bat 把 version.json 和 exe zip 传成附件。
-# 注意：Gitee 对 api/v5 的匿名请求有限制（403），因此解析 releases 网页拿附件直链。
-GITEE_RELEASES_PAGE = "https://gitee.com/AZSongguo/wcan/releases"
+# 在线更新走两个源：GitHub 为主（公开仓库的 Release API 允许匿名读，直接拿资产直链），
+# Gitee 为备（api/v5 匿名请求 403，只能解析 releases 网页）。任一个拿到就不再问下一个。
+GH_OWNER, GH_REPO = 'Kasbuky-sudo', 'wcan'
+GITEE_OWNER, GITEE_REPO = 'AZSongguo', 'wcan'
+GH_API = f"https://api.github.com/repos/{GH_OWNER}/{GH_REPO}"
+GITEE_RELEASES_PAGE = f"https://gitee.com/{GITEE_OWNER}/{GITEE_REPO}/releases"
+_ONLINE_UA = {'User-Agent': 'WCAN-Updater/1.0'}
+
+
+def _is_source_pkg(name: str) -> bool:
+    """源码更新包（给源码/Docker 部署用），别和 exe 的 zip 混了"""
+    return name.endswith('_update.zip')
+
+
+def _pick_assets(assets: dict) -> dict:
+    """{文件名: 直链} → version.json / exe zip / 源码更新包 三个直链"""
+    return {
+        'meta_url': next((u for n, u in assets.items() if n == 'version.json'), None),
+        'zip_url': next((u for n, u in assets.items() if n.endswith('.zip') and not _is_source_pkg(n)), None),
+        'pkg_url': next((u for n, u in assets.items() if _is_source_pkg(n)), None),
+    }
+
+
+def _online_payload(source, version, notes, urls, page_url):
+    """把两个源的差异抹平成一个结构，前端只认这几个字段"""
+    version = str(version or '').strip().lstrip('vV')
+    if not version:
+        return None
+    has_new = parse_version(version) > parse_version(__version__)
+    # exe 部署换 exe，源码/Docker 部署覆盖源码文件——各自需要不同的资产
+    need = urls['zip_url'] if is_frozen() else urls['pkg_url']
+    return {
+        'version': version,
+        'notes': notes or '',
+        'url': urls['zip_url'] or page_url,
+        'zip_url': urls['zip_url'],
+        'pkg_url': urls['pkg_url'],
+        'source': source,
+        'source_name': 'GitHub' if source == 'github' else 'Gitee',
+        'page_url': page_url,
+        'has_new': has_new,
+        'can_self_update': bool(has_new and need),
+        'self_update_kind': ('exe' if is_frozen() else 'source') if need else None,
+    }
+
+
+def _check_online_github():
+    """读 GitHub 最新 Release（公开仓库匿名可读）。任何失败都返回 None。"""
+    import requests as _rq
+    try:
+        r = _rq.get(f"{GH_API}/releases/latest", timeout=8,
+                    headers={**_ONLINE_UA, 'Accept': 'application/vnd.github+json'})
+        if r.status_code != 200:
+            return None
+        rel = r.json() or {}
+        tag = str(rel.get('tag_name') or '').strip()
+        if not tag:
+            return None
+        assets = {}
+        for a in rel.get('assets') or []:
+            name = a.get('name') or ''
+            url = a.get('browser_download_url')
+            if name and url:
+                assets[name] = url
+        urls = _pick_assets(assets)
+        meta = {}
+        if urls['meta_url']:
+            m = _rq.get(urls['meta_url'], timeout=8, headers=_ONLINE_UA)
+            if m.status_code == 200:
+                meta = m.json() or {}
+        body = (rel.get('body') or '').strip()
+        notes = meta.get('notes') or (body.splitlines()[0] if body else '')
+        return _online_payload('github', meta.get('version') or tag, notes, urls,
+                               rel.get('html_url') or GITEE_RELEASES_PAGE)
+    except Exception:
+        return None
+
+
+def _check_online_gitee():
+    """读 Gitee 最新 Release 页面。任何失败都返回 None。"""
+    import requests as _rq
+    try:
+        page = _rq.get(GITEE_RELEASES_PAGE, timeout=8, headers=_ONLINE_UA)
+        if page.status_code != 200:
+            return None
+        links = re.findall(r'href="(/%s/%s/releases/download/[^"]+)"' % (GITEE_OWNER, GITEE_REPO), page.text)
+        # 附件按 Release 从新到旧排列，同名只认第一个（最新的那个）
+        assets = {}
+        for l in links:
+            assets.setdefault(l.rsplit('/', 1)[-1], 'https://gitee.com' + l)
+        urls = _pick_assets(assets)
+        if not urls['meta_url']:
+            return None
+        meta = _rq.get(urls['meta_url'], timeout=8, headers=_ONLINE_UA)
+        if meta.status_code != 200:
+            return None
+        data = meta.json() or {}
+        return _online_payload('gitee', data.get('version'), data.get('notes'), urls, GITEE_RELEASES_PAGE)
+    except Exception:
+        return None
 
 
 def _check_online_version():
-    """读 Gitee 最新 Release 页面的 version.json 附件，与当前版本比较。
-
-    任何失败（网络、无 Release、无附件）都静默降级为 None，不影响主流程。
-    """
-    import requests as _rq
-    try:
-        H = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
-        page = _rq.get(GITEE_RELEASES_PAGE, timeout=8, headers=H)
-        if page.status_code != 200:
-            return None
-        # 取第一个（最新）Release 的 version.json 附件直链
-        links = re.findall(r'href="(/AZSongguo/wcan/releases/download/[^"]+)"', page.text)
-        meta_path = next((l for l in links if l.endswith('/version.json')), None)
-        zip_path = next((l for l in links if l.endswith('.zip')), None)
-        if not meta_path:
-            return None
-        meta = _rq.get('https://gitee.com' + meta_path, timeout=8, headers=H)
-        if meta.status_code != 200:
-            return None
-        data = meta.json()
-        latest = str(data.get('version', '')).strip()
-        if not latest:
-            return None
-        has_new = parse_version(latest.lstrip('vV')) > parse_version(__version__)
-        return {
-            'version': latest,
-            'notes': data.get('notes') or '',
-            'url': ('https://gitee.com' + zip_path) if zip_path else GITEE_RELEASES_PAGE,
-            'has_new': has_new,
-        }
-    except Exception:
-        return None
+    """GitHub 优先，失败退回 Gitee；都失败返回 None（静默降级，不影响主流程）"""
+    return _check_online_github() or _check_online_gitee()
 
 
 @bp.route('/api/update/check', methods=['GET'])
@@ -636,6 +709,126 @@ def check_update():
         'online': online,
     })
 
+def _apply_source_tree(src, folder='', target_ver='', lo=0, hi=92):
+    """把更新包 src 里的文件覆盖到运行目录，进度映射到 [lo, hi] 段。
+
+    data/、config.yaml、notify_config.json、webdav_config.json、文章/ 一律保留（那是用户数据）。
+    只负责复制，不管重启；返回 (total, copied, skipped)。
+    """
+    global update_progress
+    dst = DATA_DIR
+    all_files = []
+    for root, dirs, files in os.walk(src):
+        dirs[:] = [d for d in dirs if d != '__pycache__']
+        rel = os.path.relpath(root, src)
+        if rel == ".":
+            rel = ""
+        for f in files:
+            rel_path = (rel + "/" + f).lstrip("/").replace("\\", "/")
+            if rel_path.startswith("data/") or rel_path == "config.yaml" or rel_path == "notify_config.json" or rel_path == "webdav_config.json" or rel_path.startswith("文章/"):
+                continue
+            all_files.append((os.path.join(root, f), os.path.join(dst, rel, f) if rel else os.path.join(dst, f)))
+    total = len(all_files)
+    if total == 0:
+        with _status_lock:
+            old_logs = list(update_progress["logs"])
+            update_progress = {"running": False, "pct": 100, "step": "更新完成", "done": True, "result": {"success": True, "total": 0, "copied": 0, "message": "无需更新"}, "logs": old_logs + ["没有需要更新的文件"], "folder": folder, "target_ver": target_ver}
+        return 0, 0, 0
+
+    copied = 0
+    skipped = 0
+    span = max(1, hi - lo)
+    with _status_lock:
+        update_progress["step"] = "正在复制文件..."
+    for i, (src_file, dst_file) in enumerate(all_files):
+        pct = int(lo + (i / total) * span)
+        fname = os.path.basename(src_file)
+        os.makedirs(os.path.dirname(dst_file), exist_ok=True)
+        try:
+            with open(src_file, 'rb') as s:
+                with open(dst_file, 'wb') as d:
+                    d.write(s.read())
+            copied += 1
+            with _status_lock:
+                update_progress["logs"].append(f"✓ {fname}")
+        except Exception:
+            skipped += 1
+            with _status_lock:
+                update_progress["logs"].append(f"✗ 跳过 {fname}")
+        with _status_lock:
+            update_progress["pct"] = pct
+            update_progress["step"] = f"正在复制文件... ({i+1}/{total})"
+
+    with _status_lock:
+        update_progress["pct"] = hi
+        update_progress["step"] = "正在校验完整性..."
+        update_progress["logs"].append(f"共 {total} 个文件, 成功 {copied}, 跳过 {skipped}, 已保留 data/、config.yaml、notify_config.json、webdav_config.json")
+    return total, copied, skipped
+
+
+def _finish_source_update(res, folder='', target_ver='', note='', auto_exit=False):
+    """源码覆盖跑完后的收尾：写重启脚本、算重启命令、落最终状态、重启
+
+    auto_exit=True 且被启动器托管（WCAN_SUPERVISED）时，自己退出让启动器用新代码拉起来；
+    Docker 走容器重启；其余情况提示用户手动重启。
+    """
+    global update_progress
+    total, copied, skipped = res
+    dst = DATA_DIR
+    try:
+        with open(os.path.join(dst, "_restart.bat"), 'w', encoding='utf-8') as f:
+            f.write('@echo off\n')
+            f.write(f'cd /d "{dst}"\n')
+            f.write('timeout /t 2 /nobreak >nul\n')
+            f.write('python run.py\n')
+    except Exception:
+        pass
+
+    is_docker = os.path.exists('/.dockerenv') or 'docker' in (os.environ.get('container', '') or '').lower()
+    container_name = os.environ.get('HOSTNAME', '')
+    supervised = bool(os.environ.get('WCAN_SUPERVISED'))
+    if is_docker and container_name:
+        restart_cmd = f'docker restart {container_name}'
+    elif is_docker:
+        restart_cmd = 'docker restart <容器名>'
+    else:
+        restart_cmd = 'python run.py'
+    will_auto_exit = auto_exit and not is_docker and supervised
+
+    with _status_lock:
+        update_progress["logs"].append(f"重启命令: {restart_cmd}")
+        if is_docker and container_name:
+            update_progress["logs"].append(f"已计划自动重启容器: {container_name}")
+        elif is_docker:
+            update_progress["logs"].append("提示: 未识别容器名，无法自动重启，请手动执行 docker restart <容器名>")
+        elif will_auto_exit:
+            update_progress["logs"].append("已计划自动重启服务")
+
+    msg = note + f'已更新 {copied} 个文件'
+    if skipped > 0:
+        msg += f'，跳过 {skipped} 项'
+    msg += '。data/、config.yaml、notify_config.json、webdav_config.json、文章/ 已保留。'
+    if is_docker and container_name:
+        msg += f'\n容器 {container_name} 将自动重启'
+    elif is_docker:
+        msg += '\n未识别容器名，请手动重启 Docker 容器'
+    elif will_auto_exit:
+        msg += '\n服务正在自动重启，几秒后刷新页面即可'
+    else:
+        msg += '\n请重启应用'
+    with _status_lock:
+        old_logs = list(update_progress["logs"])
+        update_progress = {"running": False, "pct": 100, "step": "更新完成，准备重启", "done": True, "result": {"success": True, "total": total, "copied": copied, "skipped": skipped, "message": msg, "restart_cmd": restart_cmd, "is_docker": is_docker, "auto_restart": bool((is_docker and container_name) or will_auto_exit)}, "logs": old_logs, "folder": folder, "target_ver": target_ver}
+
+    if is_docker and container_name:
+        _schedule_container_restart(container_name)
+    elif will_auto_exit:
+        def _bye():
+            time.sleep(4)   # 留点时间让前端把最终状态取走
+            os._exit(0)
+        threading.Thread(target=_bye, daemon=True).start()
+
+
 @bp.route('/api/update/do', methods=['POST'])
 @require_auth
 def do_update():
@@ -655,92 +848,9 @@ def do_update():
 
     def _run():
         global update_progress
-        base_dir = DATA_DIR
-        dst = base_dir
         try:
-            all_files = []
-            for root, dirs, files in os.walk(src):
-                rel = os.path.relpath(root, src)
-                if rel == ".":
-                    rel = ""
-                for f in files:
-                    rel_path = (rel + "/" + f).lstrip("/").replace("\\", "/")
-                    if rel_path.startswith("data/") or rel_path == "config.yaml" or rel_path == "notify_config.json" or rel_path == "webdav_config.json" or rel_path.startswith("文章/"):
-                        continue
-                    all_files.append((os.path.join(root, f), os.path.join(dst, rel, f) if rel else os.path.join(dst, f)))
-            total = len(all_files)
-            if total == 0:
-                with _status_lock:
-                    update_progress = {"running": False, "pct": 100, "step": "更新完成", "done": True, "result": {"success": True, "total": 0, "copied": 0, "message": "无需更新"}, "logs": ["没有需要更新的文件"], "folder": folder, "target_ver": ""}
-                return
-
-            copied = 0
-            skipped = 0
-            with _status_lock:
-                update_progress["step"] = "正在复制文件..."
-            for i, (src_file, dst_file) in enumerate(all_files):
-                pct = int((i / total) * 92)
-                fname = os.path.basename(src_file)
-                os.makedirs(os.path.dirname(dst_file), exist_ok=True)
-                try:
-                    with open(src_file, 'rb') as s:
-                        with open(dst_file, 'wb') as d:
-                            d.write(s.read())
-                    copied += 1
-                    with _status_lock:
-                        update_progress["logs"].append(f"✓ {fname}")
-                except Exception:
-                    skipped += 1
-                    with _status_lock:
-                        update_progress["logs"].append(f"✗ 跳过 {fname}")
-                with _status_lock:
-                    update_progress["pct"] = pct
-                    update_progress["step"] = f"正在复制文件... ({i+1}/{total})"
-
-            with _status_lock:
-                update_progress["pct"] = 95
-                update_progress["step"] = "正在校验完整性..."
-                update_progress["logs"].append(f"共 {total} 个文件, 成功 {copied}, 跳过 {skipped}, 已保留 data/、config.yaml、notify_config.json、webdav_config.json")
-
-            restart_script = os.path.join(dst, "_restart.bat")
-            with open(restart_script, 'w', encoding='utf-8') as f:
-                f.write('@echo off\n')
-                f.write(f'cd /d "{dst}"\n')
-                f.write('timeout /t 2 /nobreak >nul\n')
-                f.write('python run.py\n')
-
-            is_docker = os.path.exists('/.dockerenv') or 'docker' in (os.environ.get('container', '') or '').lower()
-            container_name = os.environ.get('HOSTNAME', '')
-            if is_docker and container_name:
-                restart_cmd = f'docker restart {container_name}'
-            elif is_docker:
-                restart_cmd = 'docker restart <容器名>'
-            else:
-                restart_cmd = 'python run.py'
-
-            with _status_lock:
-                update_progress["logs"].append(f"重启命令: {restart_cmd}")
-                if is_docker and container_name:
-                    update_progress["logs"].append(f"已计划自动重启容器: {container_name}")
-                elif is_docker:
-                    update_progress["logs"].append("提示: 未识别容器名，无法自动重启，请手动执行 docker restart <容器名>")
-
-            msg = f'已更新 {copied} 个文件'
-            if skipped > 0:
-                msg += f'，跳过 {skipped} 项'
-            msg += '。data/、config.yaml、notify_config.json、webdav_config.json、文章/ 已保留。'
-            if is_docker and container_name:
-                msg += f'\n容器 {container_name} 将自动重启'
-            elif is_docker:
-                msg += '\n未识别容器名，请手动重启 Docker 容器'
-            else:
-                msg += '\n请重启应用'
-            with _status_lock:
-                old_logs = list(update_progress["logs"])
-                update_progress = {"running": False, "pct": 100, "step": "更新完成，准备重启", "done": True, "result": {"success": True, "total": total, "copied": copied, "skipped": skipped, "message": msg, "restart_cmd": restart_cmd, "is_docker": is_docker, "auto_restart": bool(is_docker and container_name)}, "logs": old_logs, "folder": folder, "target_ver": ""}
-
-            if is_docker and container_name:
-                _schedule_container_restart(container_name)
+            res = _apply_source_tree(src, folder=folder)
+            _finish_source_update(res, folder=folder)
         except Exception as e:
             with _status_lock:
                 update_progress["logs"].append(f"✗ 错误: {e}")
@@ -749,6 +859,218 @@ def do_update():
 
     _safe_thread(_run)
     return jsonify({'success': True, 'message': '更新任务已启动'})
+
+
+# ==================== 一键在线更新 ====================
+
+def _set_progress(pct=None, step=None):
+    with _status_lock:
+        if pct is not None:
+            update_progress["pct"] = pct
+        if step is not None:
+            update_progress["step"] = step
+
+
+def _add_log(line):
+    with _status_lock:
+        update_progress["logs"].append(line)
+
+
+def _download_file(url, dst, lo=0, hi=50):
+    """流式下载文件，把进度映射到 [lo, hi] 段，返回字节数"""
+    import requests as _rq
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    got = 0
+    with _rq.get(url, stream=True, timeout=(10, 600), headers=_ONLINE_UA) as r:
+        r.raise_for_status()
+        total = int(r.headers.get('Content-Length') or 0)
+        with open(dst, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1 << 20):
+                if not chunk:
+                    continue
+                f.write(chunk)
+                got += len(chunk)
+                mb = got // 1048576
+                if total:
+                    _set_progress(pct=int(lo + (hi - lo) * got / total), step=f"正在下载新版本... {mb}/{total // 1048576} MB")
+                else:
+                    _set_progress(step=f"正在下载新版本... {mb} MB")
+    return got
+
+
+def _extract_exe_from_zip(zip_path, want_name, out_path):
+    """从发布 zip 里取出 exe（优先同名，否则取第一个 exe 条目）"""
+    with zipfile.ZipFile(zip_path) as z:
+        names = [n for n in z.namelist() if n.lower().endswith('.exe')]
+        if not names:
+            raise RuntimeError('更新包里没有找到 exe')
+        target = next((n for n in names if os.path.basename(n).lower() == want_name.lower()), names[0])
+        with z.open(target) as s, open(out_path, 'wb') as d:
+            shutil.copyfileobj(s, d, 1 << 20)
+    return out_path
+
+
+def _verify_new_exe(path):
+    """下载完整性兜底：体积和 PE 文件头都对得上才允许替换"""
+    size = os.path.getsize(path)
+    if size < 20 * 1024 * 1024:
+        raise RuntimeError(f'下载的程序体积异常（{size} 字节），已中止替换')
+    with open(path, 'rb') as f:
+        if f.read(2) != b'MZ':
+            raise RuntimeError('下载的文件不是 Windows 可执行文件，已中止替换')
+    return size
+
+
+def _write_swap_script(app_exe, new_exe, log_path):
+    """生成替换脚本：结束旧进程 → 用新文件覆盖 → 重新启动。
+
+    本进程自己也占着 exe 文件句柄，不退出就换不掉，所以必须交给独立脚本做。
+    exe 名和路径都是中文，按 GBK + CRLF 写，cmd 才认得。
+    """
+    exe_name = os.path.basename(app_exe)
+    lines = [
+        '@echo off',
+        'chcp 936 >nul',
+        f'set "APP={app_exe}"',
+        f'set "NEW={new_exe}"',
+        f'set "LOG={log_path}"',
+        'echo [%date% %time%] 开始应用更新 >>"%LOG%"',
+        'set /a N=0',
+        ':swap',
+        'set /a N+=1',
+        'if %N% GTR 60 goto fail',
+        f'taskkill /F /IM "{exe_name}" >nul 2>&1',
+        'ping -n 2 127.0.0.1 >nul',
+        'move /y "%NEW%" "%APP%" >nul 2>&1',
+        'if errorlevel 1 goto swap',
+        'echo [%date% %time%] 替换成功 >>"%LOG%"',
+        'start "" "%APP%"',
+        'exit /b 0',
+        ':fail',
+        'echo [%date% %time%] 替换失败：文件仍被占用 >>"%LOG%"',
+        'exit /b 1',
+    ]
+    path = os.path.join(tempfile.gettempdir(), f'wcan_swap_{int(time.time())}.bat')
+    with open(path, 'w', encoding='gbk', newline='\r\n') as f:
+        f.write('\n'.join(lines) + '\n')
+    return path
+
+
+def _spawn_detached(bat_path):
+    """脱离父进程启动替换脚本，本进程退出后它照样跑"""
+    flags = 0x00000008 | 0x00000200  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+    return subprocess.Popen(['cmd', '/c', bat_path], creationflags=flags,
+                            close_fds=True, cwd=tempfile.gettempdir())
+
+
+def _run_online_exe(info):
+    """exe 部署：下载 → 解出 exe → 生成替换脚本 → 本进程退出，由脚本换文件并重启"""
+    global update_progress
+    app_exe = sys.executable
+    work = os.path.join(tempfile.gettempdir(), 'wcan_update')
+    os.makedirs(work, exist_ok=True)
+    zip_path = os.path.join(work, 'new_release.zip')
+    new_exe = app_exe + '.new'
+    if os.path.exists(new_exe):
+        try:
+            os.remove(new_exe)
+        except Exception:
+            pass
+
+    got = _download_file(info['zip_url'], zip_path, 1, 80)
+    _add_log(f"已下载 {got // 1048576} MB")
+    _set_progress(step="正在解压新版本...", pct=85)
+    _extract_exe_from_zip(zip_path, os.path.basename(app_exe), new_exe)
+    size = _verify_new_exe(new_exe)
+    _add_log(f"新版本程序校验通过（{size // 1048576} MB）")
+
+    _set_progress(step="正在准备替换程序...", pct=92)
+    log_path = os.path.join(DATA_DIR, 'data', 'update_apply.log')
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    bat = _write_swap_script(app_exe, new_exe, log_path)
+    _add_log(f"替换脚本已生成: {bat}")
+    _spawn_detached(bat)
+    _add_log("程序即将退出，由替换脚本接管")
+
+    with _status_lock:
+        old_logs = list(update_progress["logs"])
+        update_progress = {"running": False, "pct": 100, "step": "正在自动替换并重启", "done": True,
+                           "result": {"success": True, "total": 0, "copied": 0, "skipped": 0,
+                                      "message": f"v{info['version']} 已下载完成，程序会自动关闭，几秒后以新版本重新打开。\n若没有自动打开，手动双击一次程序即可。",
+                                      "restart_cmd": "自动替换并重启", "is_docker": False, "auto_restart": True},
+                           "logs": old_logs, "folder": "", "target_ver": info['version']}
+    time.sleep(3)   # 留点时间让前端把最后状态取走
+    os._exit(0)
+
+
+def _run_online_source(info):
+    """源码/Docker 部署：下载源码更新包 → 覆盖文件 → 重启"""
+    update_dir = get_update_dir()
+    os.makedirs(update_dir, exist_ok=True)
+    ver = str(info['version']).lstrip('vV')
+    folder = f"WCAN_v{ver}_update"
+    dst_dir = os.path.join(update_dir, folder)
+    zip_path = os.path.join(update_dir, folder + '.zip')
+
+    got = _download_file(info['pkg_url'], zip_path, 1, 35)
+    _add_log(f"更新包已下载（{max(1, got // 1024)} KB）")
+    _set_progress(step="正在解压更新包...", pct=40)
+
+    if os.path.isdir(dst_dir):
+        shutil.rmtree(dst_dir, ignore_errors=True)
+    with zipfile.ZipFile(zip_path) as z:
+        z.extractall(update_dir)
+    if not os.path.isdir(dst_dir):
+        # 压缩包多套一层目录时兜一下
+        for d in sorted(os.listdir(update_dir)):
+            cand = os.path.join(update_dir, d)
+            if os.path.isdir(cand) and os.path.exists(os.path.join(cand, 'app', 'core.py')):
+                dst_dir = cand
+                break
+    if not os.path.isdir(dst_dir):
+        raise RuntimeError('更新包解压后没有找到有效的目录结构')
+
+    name = os.path.basename(dst_dir)
+    with _status_lock:
+        update_progress["folder"] = name
+    res = _apply_source_tree(dst_dir, folder=name, target_ver=ver, lo=42, hi=92)
+    _finish_source_update(res, folder=name, target_ver=ver, note='已从线上下载更新包。', auto_exit=True)
+
+
+def _run_online_update(info):
+    try:
+        if info.get('self_update_kind') == 'exe':
+            _run_online_exe(info)
+        else:
+            _run_online_source(info)
+    except Exception as e:
+        with _status_lock:
+            update_progress["logs"].append(f"✗ 错误: {e}")
+            old_logs = list(update_progress["logs"])
+            update_progress = {"running": False, "pct": 0, "step": "更新失败", "done": True, "result": {"success": False, "error": str(e)}, "logs": old_logs, "folder": "", "target_ver": ""}
+
+
+@bp.route('/api/update/online', methods=['POST'])
+@require_auth
+def do_online_update():
+    """一键在线更新：exe 部署自动替换重启，源码/Docker 部署下载更新包覆盖"""
+    global update_progress
+    if update_progress.get("running"):
+        return jsonify({'success': False, 'error': '已有更新任务正在进行'})
+    info = _check_online_version()
+    if not info:
+        return jsonify({'success': False, 'error': '获取在线版本失败，请检查网络'})
+    if not info.get('has_new'):
+        return jsonify({'success': False, 'error': f"当前已是最新版本（v{__version__}）"})
+    if not info.get('can_self_update'):
+        return jsonify({'success': False, 'error': f"v{info['version']} 没有适用于当前部署方式的更新包，请手动下载"})
+
+    update_progress = {"running": True, "pct": 0, "step": f"正在准备更新到 v{info['version']}...", "done": False,
+                       "result": None, "logs": [f"来源: {info.get('source_name')}", f"目标版本: v{info['version']}"],
+                       "folder": "", "target_ver": info['version']}
+    _safe_thread(_run_online_update, (info,))
+    return jsonify({'success': True, 'version': info['version'], 'source': info.get('source_name'),
+                    'kind': info.get('self_update_kind'), 'message': '更新任务已启动'})
 
 @bp.route('/api/update/progress', methods=['GET'])
 def update_progress_status():

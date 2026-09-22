@@ -180,7 +180,9 @@ def _spawn_server():
             cmd = [sys.executable, os.path.join(_BASE, "launcher.py"), "--serve"]
         log(f"启动服务进程: {cmd}")
         flags = 0x08000000 if os.name == "nt" else 0  # CREATE_NO_WINDOW：不弹黑框
-        return subprocess.Popen(cmd, cwd=user_dir(), creationflags=flags)
+        # 告诉子进程它被托管着：在线更新后可以放心退出，窗口这边会自动把它拉起来
+        env = dict(os.environ, WCAN_SUPERVISED="1")
+        return subprocess.Popen(cmd, cwd=user_dir(), creationflags=flags, env=env)
     except Exception as e:
         log(f"启动服务进程失败: {e}")
         return None

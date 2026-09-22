@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory=$true)][string]$Version,
     [Parameter(Mandatory=$true)][string]$ZipPath,
-    [Parameter(Mandatory=$true)][string]$Token
+    [Parameter(Mandatory=$true)][string]$Token,
+    [string]$PkgPath = ''
 )
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -35,6 +36,10 @@ $releaseId = $r.id
 # 2) 上传附件：zip 给用户下载，version.json 给应用内「检查更新」读版本号（缺了它在线更新会静默失效）
 function Send-Attachment {
     param([string]$Path, [string]$ContentType)
+    if (-not $Path -or -not (Test-Path $Path)) {
+        Write-Host "  [跳过] 文件不存在: $Path"
+        return
+    }
     $file = Resolve-Path $Path
     # 附件接口只认 Authorization 头；用 ?token= 传凭据会回 40001 登录失效
     $uploadUri = "$Api/releases/$releaseId/attach_files"
@@ -62,5 +67,6 @@ function Send-Attachment {
 }
 
 Send-Attachment -Path $ZipPath -ContentType 'application/zip'
+if ($PkgPath) { Send-Attachment -Path $PkgPath -ContentType 'application/zip' }
 Send-Attachment -Path (Join-Path $PSScriptRoot 'version.json') -ContentType 'application/json'
 exit 0

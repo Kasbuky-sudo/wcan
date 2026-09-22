@@ -2275,6 +2275,7 @@ html[data-theme="dark"] .history-date-divider,
             </div>
         </div>
         <div class="app-modal-footer">
+            <button id="updateOnlineBtn" class="app-btn app-btn-primary" style="display:none;"><i class="icons10-download-2"></i><span>一键更新</span></button>
             <button id="updateDoBtn" class="app-btn app-btn-primary" style="display:none;"><i class="icons10-download-2"></i><span>开始更新</span></button>
             <button class="app-btn" onclick="closeModal('updateModal')">关闭</button>
         </div>
@@ -4236,6 +4237,7 @@ function tripleClickClear(btn) { /* 由 addEventListener 处理三击逻辑 */ }
     const updateCurrentVer = document.getElementById('updateCurrentVer');
     const updateAvailableList = document.getElementById('updateAvailableList');
     const updateDoBtn = document.getElementById('updateDoBtn');
+    const updateOnlineBtn = document.getElementById('updateOnlineBtn');
     const updatePanelCheck = document.getElementById('updatePanelCheck');
     const updatePanelProgress = document.getElementById('updatePanelProgress');
     const updateProgressBar = document.getElementById('updateProgressBar');
@@ -4381,19 +4383,29 @@ function tripleClickClear(btn) { /* 由 addEventListener 处理三击逻辑 */ }
             updateResultMsg.style.display = 'none';
             updateLogBox.textContent = '';
             updateRestartArea.style.display = 'none';
+            updateOnlineBtn.style.display = 'none';
             updateCurrentVer.textContent = data.current_version || '未知';
             var online = data.online;
             if (online && online.has_new) {
+                var selfUp = !!(online.can_self_update);
+                var kindHint = online.self_update_kind === 'exe'
+                    ? '自动下载并替换程序，完成后会自己重启'
+                    : '自动下载更新包并覆盖源文件，完成后自动重启服务';
                 updateAvailableList.innerHTML =
                     '<div style="background:var(--color-primary-light); border-radius:6px; padding:12px; margin-bottom:8px; border:1px solid var(--color-ui-border-default);">' +
                     '<div style="display:flex; align-items:center; gap:8px;">' +
                     '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-success-default); flex-shrink:0;"></span>' +
                     '<span style="font-weight:600; color:var(--color-primary);">v' + online.version + '</span>' +
+                    (online.source_name ? '<span style="font-size:11px; color:var(--color-text-secondary); margin-left:auto;">来源 ' + online.source_name + '</span>' : '') +
                     '</div>' +
                     (online.notes ? '<div style="font-size:12px; color:var(--color-text-secondary); margin-top:4px;">' + online.notes + '</div>' : '') +
-                    '<div style="margin-top:10px;"><a class="app-btn app-btn-primary" href="' + online.url + '" target="_blank" style="text-decoration:none;">' +
-                    '<i class="icons10-download"></i><span>前往下载新版本</span></a></div>' +
+                    (selfUp
+                        ? '<div style="font-size:12px; color:var(--color-text-secondary); margin-top:8px;">点下方「一键更新」' + kindHint + '</div>' +
+                          '<div style="margin-top:8px;"><a href="' + (online.page_url || online.url) + '" target="_blank" style="font-size:11px; color:var(--color-text-secondary);">也可以手动前往 ' + (online.source_name || '发布页') + ' 下载</a></div>'
+                        : '<div style="margin-top:10px;"><a class="app-btn app-btn-primary" href="' + online.url + '" target="_blank" style="text-decoration:none;">' +
+                          '<i class="icons10-download"></i><span>前往下载新版本</span></a></div>') +
                     '</div>';
+                updateOnlineBtn.style.display = selfUp ? 'inline-flex' : 'none';
                 updateDoBtn.style.display = 'none';
                 document.getElementById('updateChangelogArea').style.display = 'none';
             } else if (data.available && data.available.length > 0) {
@@ -4421,6 +4433,23 @@ function tripleClickClear(btn) { /* 由 addEventListener 处理三击逻辑 */ }
             checkUpdateBtn.disabled = false;
             checkUpdateBtnLabel('<i class="icons10-refresh" style="font-size:14px;"></i>', ' 检查更新');
             showToast('网络错误，请稍后重试');
+        });
+    });
+
+    updateOnlineBtn.addEventListener('click', function() {
+        updateOnlineBtn.style.display = 'none';
+        authFetch('/api/update/online', { method: 'POST' })
+        .then(function(r) { return r.json(); }).then(function(initData) {
+            if (!initData.success) {
+                showToast('启动失败: ' + (initData.error || '未知错误'));
+                updateOnlineBtn.style.display = 'inline-flex';
+                return;
+            }
+            pollAndShowProgress(true);
+        }).catch(function(err) {
+            var msg = (err && err.message === '密码错误') ? '密码错误，请重试' : '网络错误，请重试';
+            showToast(msg);
+            updateOnlineBtn.style.display = 'inline-flex';
         });
     });
 

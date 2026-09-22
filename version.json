@@ -1,6 +1,6 @@
 {
-  "version": "6.0.3",
-  "notes": "点一次获取一张新二维码，不再复用旧码；换码后旧检测自动停止；登录状态重启直接复用",
-  "download_url": "https://gitee.com/AZSongguo/wcan/releases",
-  "updated_at": "2026-09-21"
+  "version": "6.0.4",
+  "notes": "新增「一键更新」：检查到新版本点一下自动下载并升级、自己重启；在线更新主源改为 GitHub，Gitee 作备用源",
+  "download_url": "https://github.com/Kasbuky-sudo/wcan/releases",
+  "updated_at": "2026-09-22"
 }

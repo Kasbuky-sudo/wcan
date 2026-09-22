@@ -39,10 +39,10 @@ if not defined VER (
     pause & exit /b 1
 )
 set "VER=%VER:"=%"
-echo [1/6] 当前版本: v%VER%
+echo [1/7] 当前版本: v%VER%
 
 rem ================= 2. 打包 exe =================
-echo [2/6] 打包 exe（首次约 1-3 分钟）...
+echo [2/7] 打包 exe（首次约 1-3 分钟）...
 if exist dist rmdir /s /q dist
 python -m PyInstaller --noconfirm --onefile --noconsole --name "编舟文心" ^
   --distpath dist --workpath build --specpath build ^
@@ -64,7 +64,7 @@ if not exist "dist\编舟文心.exe" (
 for %%F in ("dist\编舟文心.exe") do echo       完成: %%~zF 字节
 
 rem ================= 3. 压缩 exe =================
-echo [3/6] 压缩 exe 为 zip...
+echo [3/7] 压缩 exe 为 zip...
 set "ZIP=WCAN_v%VER%.zip"
 powershell -NoProfile -Command "Compress-Archive -Path 'dist\编舟文心.exe' -DestinationPath 'dist\%ZIP%' -Force"
 if not exist "dist\%ZIP%" (
@@ -74,7 +74,7 @@ if not exist "dist\%ZIP%" (
 echo       已生成: dist\%ZIP%
 
 rem ================= 4. 更新 version.json 并提交推送 =================
-echo [4/6] 更新 version.json 并推送...
+echo [4/7] 更新 version.json 并推送...
 powershell -NoProfile -Command ^
   "$j = Get-Content version.json -Raw -Encoding UTF8 | ConvertFrom-Json;" ^
   "$j.version = '%VER%';" ^
@@ -89,23 +89,51 @@ if errorlevel 1 (
 )
 git push origin main
 if errorlevel 1 (
-    echo [错误] git push 失败，中止（Release 不会发布）。
+    echo [错误] Gitee 推送失败，中止（Release 不会发布）。
     pause & exit /b 1
 )
-echo       已推送
+git push github main
+if errorlevel 1 (
+    echo [警告] GitHub 推送失败，代码只到了 Gitee；GitHub Release 可能会指向旧提交。
+)
+echo       已推送（Gitee + GitHub）
 
-rem ================= 5. 发布 Gitee Release（先传附件再创建）=================
-echo [5/6] 发布 Gitee Release v%VER%...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0release_gitee.ps1" -Version "%VER%" -ZipPath "dist\%ZIP%" -Token "%GITEE_TOKEN%"
+rem ================= 5. 生成源码更新包（源码/Docker 部署的在线更新用）=================
+echo [5/7] 生成源码更新包...
+if exist "update\WCAN_v%VER%_update" rmdir /s /q "update\WCAN_v%VER%_update"
+python build_update.py > build\release_update.log 2>&1
+if not exist "update\WCAN_v%VER%_update\app\core.py" (
+    echo [错误] 更新包生成失败，日志: build\release_update.log
+    pause & exit /b 1
+)
+set "PKG=dist\WCAN_v%VER%_update.zip"
+powershell -NoProfile -Command "Compress-Archive -Path 'update\WCAN_v%VER%_update' -DestinationPath '%PKG%' -Force"
+if not exist "%PKG%" (
+    echo [错误] 更新包压缩失败。
+    pause & exit /b 1
+)
+for %%F in ("%PKG%") do echo       完成: %%~zF 字节
+
+rem ================= 6. 发布 Gitee Release（先传附件再创建）=================
+echo [6/7] 发布 Gitee Release v%VER%...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0release_gitee.ps1" -Version "%VER%" -ZipPath "dist\%ZIP%" -PkgPath "%PKG%" -Token "%GITEE_TOKEN%"
 if errorlevel 1 (
     echo [错误] Release 发布失败，详见上方输出。代码已推送，可手动重试上传附件。
     pause & exit /b 1
 )
 
-echo [6/6] 完成！
+rem ================= 7. 发布 GitHub Release（令牌自动取 git 凭据管理器里那份）=================
+echo [7/7] 发布 GitHub Release v%VER%...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0release_github.ps1" -Version "%VER%" -ZipPath "dist\%ZIP%" -PkgPath "%PKG%"
+if errorlevel 1 (
+    echo [警告] GitHub 发布失败。Gitee 那边已发布，应用仍能检查到更新。
+)
+
+echo 全部完成！
 echo.
-echo   仓库 : https://gitee.com/AZSongguo/wcan
-echo   发布 : https://gitee.com/AZSongguo/wcan/releases/tag/v%VER%
-echo   部员侧: 打开应用 -^> 检查更新 -^> 会提示 v%VER% 并给出下载链接
+echo   仓库 : https://github.com/Kasbuky-sudo/wcan  ^|  https://gitee.com/AZSongguo/wcan
+echo   发布 : https://github.com/Kasbuky-sudo/wcan/releases/tag/v%VER%
+echo          https://gitee.com/AZSongguo/wcan/releases/tag/v%VER%
+echo   部员侧: 打开应用 -^> 检查更新 -^> 点「一键更新」自动升级（源码部署/容器同样支持）
 echo.
 pause
